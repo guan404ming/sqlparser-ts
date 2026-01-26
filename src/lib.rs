@@ -1,12 +1,11 @@
-use wasm_bindgen::prelude::*;
+use serde::{Deserialize, Serialize};
 use sqlparser::dialect::{
-    AnsiDialect, BigQueryDialect, ClickHouseDialect, DatabricksDialect,
-    Dialect, DuckDbDialect, GenericDialect, HiveDialect, MsSqlDialect,
-    MySqlDialect, PostgreSqlDialect, RedshiftSqlDialect, SQLiteDialect,
-    SnowflakeDialect,
+    AnsiDialect, BigQueryDialect, ClickHouseDialect, DatabricksDialect, Dialect, DuckDbDialect,
+    GenericDialect, HiveDialect, MsSqlDialect, MySqlDialect, PostgreSqlDialect, RedshiftSqlDialect,
+    SQLiteDialect, SnowflakeDialect,
 };
 use sqlparser::parser::Parser;
-use serde::{Deserialize, Serialize};
+use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(start)]
 pub fn init() {
@@ -113,9 +112,8 @@ pub fn parse_sql_with_options(
 pub fn parse_sql_to_json_string(dialect: &str, sql: &str) -> Result<String, JsValue> {
     let dialect_impl = get_dialect(dialect);
 
-    let statements = Parser::parse_sql(dialect_impl.as_ref(), sql).map_err(|e| {
-        JsValue::from_str(&e.to_string())
-    })?;
+    let statements = Parser::parse_sql(dialect_impl.as_ref(), sql)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
 
     serde_json::to_string_pretty(&statements)
         .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
@@ -126,9 +124,8 @@ pub fn parse_sql_to_json_string(dialect: &str, sql: &str) -> Result<String, JsVa
 pub fn parse_sql_to_string(dialect: &str, sql: &str) -> Result<String, JsValue> {
     let dialect_impl = get_dialect(dialect);
 
-    let statements = Parser::parse_sql(dialect_impl.as_ref(), sql).map_err(|e| {
-        JsValue::from_str(&e.to_string())
-    })?;
+    let statements = Parser::parse_sql(dialect_impl.as_ref(), sql)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
 
     Ok(statements
         .iter()
@@ -176,6 +173,7 @@ pub fn validate_sql(dialect: &str, sql: &str) -> Result<bool, JsValue> {
             message: e.to_string(),
             line: None,
             column: None,
-        }).unwrap_or(JsValue::from_str(&e.to_string()))),
+        })
+        .unwrap_or(JsValue::from_str(&e.to_string()))),
     }
 }

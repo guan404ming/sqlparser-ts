@@ -18,8 +18,8 @@ module.exports = {
   },
   moduleNameMapper: {
     // Redirect src imports to dist/cjs for testing
-    '^../src$': '<rootDir>/dist/cjs/index.js',
-    '^../src/(.*)$': '<rootDir>/dist/cjs/$1',
+    '^(\\.\\./)+src$': '<rootDir>/dist/cjs/index.js',
+    '^(\\.\\./)+src/(.*)$': '<rootDir>/dist/cjs/$2',
   },
   collectCoverage: false,
 };

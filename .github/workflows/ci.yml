@@ -17,6 +17,10 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
+          components: rustfmt
+
+      - name: Check Rust format
+        run: cargo fmt --check
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -34,6 +38,10 @@ jobs:
       - name: Install npm dependencies
         working-directory: ts
         run: npm ci
+
+      - name: Lint TypeScript
+        working-directory: ts
+        run: npm run lint
 
       - name: Build TypeScript
         working-directory: ts

@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 use sqlparser::dialect::{
     AnsiDialect, BigQueryDialect, ClickHouseDialect, DatabricksDialect, Dialect, DuckDbDialect,
-    GenericDialect, HiveDialect, MsSqlDialect, MySqlDialect, PostgreSqlDialect, RedshiftSqlDialect,
-    SQLiteDialect, SnowflakeDialect,
+    GenericDialect, HiveDialect, MsSqlDialect, MySqlDialect, OracleDialect, PostgreSqlDialect,
+    RedshiftSqlDialect, SQLiteDialect, SnowflakeDialect,
 };
 use sqlparser::parser::Parser;
 use wasm_bindgen::prelude::*;
@@ -46,7 +46,7 @@ fn get_dialect(dialect_name: &str) -> Box<dyn Dialect> {
         "duckdb" => Box::new(DuckDbDialect {}),
         "databricks" => Box::new(DatabricksDialect {}),
         "hive" => Box::new(HiveDialect {}),
-        // Oracle dialect may not be available in all versions
+        "oracle" => Box::new(OracleDialect {}),
         _ => Box::new(GenericDialect {}),
     }
 }
@@ -157,6 +157,7 @@ pub fn get_supported_dialects() -> JsValue {
         "duckdb",
         "databricks",
         "hive",
+        "oracle",
     ];
 
     serde_wasm_bindgen::to_value(&dialects).unwrap()

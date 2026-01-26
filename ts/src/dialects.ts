@@ -105,6 +105,13 @@ export class HiveDialect implements Dialect {
 }
 
 /**
+ * Oracle dialect
+ */
+export class OracleDialect implements Dialect {
+  readonly name = 'oracle';
+}
+
+/**
  * All supported dialect names
  */
 export const SUPPORTED_DIALECTS = [
@@ -121,6 +128,7 @@ export const SUPPORTED_DIALECTS = [
   'duckdb',
   'databricks',
   'hive',
+  'oracle',
 ] as const;
 
 export type DialectName = (typeof SUPPORTED_DIALECTS)[number];
@@ -142,6 +150,7 @@ const DIALECT_MAP: Record<DialectName, new () => Dialect> = {
   duckdb: DuckDbDialect,
   databricks: DatabricksDialect,
   hive: HiveDialect,
+  oracle: OracleDialect,
 };
 
 /**

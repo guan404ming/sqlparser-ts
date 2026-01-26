@@ -4,17 +4,9 @@
  */
 
 import {
-  parse,
   parseOne,
-  format,
-  expectParseError,
   dialects,
   ensureWasmInitialized,
-  isQuery,
-  isInsert,
-  isCreateTable,
-  isCreateView,
-  isMerge,
 } from '../test-utils';
 
 const bq = dialects.bigquery;

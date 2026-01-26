@@ -4,16 +4,9 @@
  */
 
 import {
-  parse,
   parseOne,
-  format,
-  expectParseError,
   dialects,
   ensureWasmInitialized,
-  isQuery,
-  isCreateTable,
-  isCreateView,
-  isAlterTable,
 } from '../test-utils';
 
 const sf = dialects.snowflake;

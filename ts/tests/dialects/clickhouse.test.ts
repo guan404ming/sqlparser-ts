@@ -4,14 +4,9 @@
  */
 
 import {
-  parse,
   parseOne,
-  format,
-  expectParseError,
   dialects,
   ensureWasmInitialized,
-  isQuery,
-  isCreateTable,
 } from '../test-utils';
 
 const clickhouse = dialects.clickhouse;

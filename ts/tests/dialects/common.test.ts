@@ -5,15 +5,12 @@
  */
 
 import {
-  parse,
   parseOne,
-  format,
   expectParseError,
   dialects,
   ensureWasmInitialized,
   isQuery,
   isInsert,
-  isUpdate,
   isDelete,
   isCreateTable,
   isCreateView,

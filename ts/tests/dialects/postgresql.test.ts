@@ -4,17 +4,10 @@
  */
 
 import {
-  parse,
   parseOne,
-  format,
   expectParseError,
   dialects,
   ensureWasmInitialized,
-  isQuery,
-  isInsert,
-  isCreateTable,
-  isAlterTable,
-  isCopy,
 } from '../test-utils';
 
 const pg = dialects.postgresql;

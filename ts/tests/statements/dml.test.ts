@@ -4,16 +4,12 @@
  */
 
 import {
-  parse,
   parseOne,
-  format,
-  expectParseError,
   dialects,
   ensureWasmInitialized,
   isInsert,
   isUpdate,
   isDelete,
-  isMerge,
 } from '../test-utils';
 
 beforeAll(async () => {

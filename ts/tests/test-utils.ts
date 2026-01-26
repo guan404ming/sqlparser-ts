@@ -160,7 +160,7 @@ export async function testAllDialects(
       if (testFn) {
         await testFn(statements, dialect);
       }
-    } catch (error) {
+    } catch {
       // Some SQL may not be valid in all dialects, that's expected
     }
   }

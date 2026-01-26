@@ -4,7 +4,6 @@
  */
 
 import {
-  parse,
   parseOne,
   expectParseError,
   dialects,

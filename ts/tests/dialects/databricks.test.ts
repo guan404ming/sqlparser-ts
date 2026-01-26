@@ -4,12 +4,10 @@
  */
 
 import {
-  parse,
   parseOne,
   expectParseError,
   dialects,
   ensureWasmInitialized,
-  isQuery,
 } from '../test-utils';
 
 const databricks = dialects.databricks;

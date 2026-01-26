@@ -4,10 +4,7 @@
  */
 
 import {
-  parse,
   parseOne,
-  format,
-  expectParseError,
   dialects,
   ensureWasmInitialized,
   isCreateTable,

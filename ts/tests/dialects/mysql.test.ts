@@ -4,14 +4,9 @@
  */
 
 import {
-  parse,
   parseOne,
-  format,
-  expectParseError,
   dialects,
   ensureWasmInitialized,
-  isQuery,
-  isInsert,
   isCreateTable,
 } from '../test-utils';
 

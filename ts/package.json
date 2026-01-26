@@ -50,6 +50,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^22.10.0",
     "eslint": "^9.18.0",
+    "eslint-plugin-unused-imports": "^4.3.0",
     "jest": "^30.2.0",
     "ts-jest": "^29.2.0",
     "typescript": "^5.7.0",

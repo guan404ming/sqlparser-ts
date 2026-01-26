@@ -162,7 +162,7 @@ for (const stmt of statements) {
 }
 ```
 
-## Building from Source
+## Development
 
 ### Prerequisites
 
@@ -186,7 +186,7 @@ npm install
 npm run build
 ```
 
-### Run Tests
+### Tests
 
 ```bash
 cd ts
@@ -201,7 +201,7 @@ npm test
 
 ## License
 
-Apache-2.0, matching the upstream Rust crate.
+Apache-2.0
 
 ## Related Projects
 

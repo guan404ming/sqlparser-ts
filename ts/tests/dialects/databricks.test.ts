@@ -132,7 +132,10 @@ describe('Databricks - TIMESTAMP_NTZ', () => {
 });
 
 describe('Databricks - Table Time Travel', () => {
-  test('parse_table_time_travel', async () => {
+  // TODO: Enable when sqlparser >= 0.61.0
+  // - TIMESTAMP AS OF: PR #2134 merged Jan 7, 2026
+  // - VERSION AS OF: PR #2155 merged Jan 20, 2026
+  test.skip('parse_table_time_travel', async () => {
     // TIMESTAMP AS OF for temporal queries
     await parseOne(
       "SELECT * FROM t1 TIMESTAMP AS OF '2018-10-18T22:15:12.013Z'",

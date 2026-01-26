@@ -443,8 +443,10 @@ describe('PostgreSQL - DISTINCT ON', () => {
 });
 
 describe('PostgreSQL - VACUUM/ANALYZE', () => {
+  // TODO: Enable when sqlparser adds full VACUUM support for PostgreSQL
+  // VACUUM with options (FULL, ANALYZE, VERBOSE) not yet supported
+  // No upstream PR found for this feature
   test.skip('parse_vacuum', async () => {
-    // VACUUM is not yet fully supported
     await parseOne('VACUUM', pg);
     await parseOne('VACUUM t', pg);
     await parseOne('VACUUM FULL t', pg);
@@ -452,8 +454,10 @@ describe('PostgreSQL - VACUUM/ANALYZE', () => {
     await parseOne('VACUUM (VERBOSE) t', pg);
   });
 
+  // TODO: Enable when sqlparser adds full ANALYZE support for PostgreSQL
+  // ANALYZE with column specification not yet supported
+  // No upstream PR found for this feature
   test.skip('parse_analyze', async () => {
-    // ANALYZE standalone is not yet fully supported
     await parseOne('ANALYZE', pg);
     await parseOne('ANALYZE t', pg);
     await parseOne('ANALYZE t (col1, col2)', pg);

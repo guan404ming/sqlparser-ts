@@ -1,330 +1,223 @@
+/**
+ * Basic parser tests
+ * Tests core parser functionality across dialects
+ */
+
 import {
-  Parser,
-  GenericDialect,
-  PostgreSqlDialect,
-  MySqlDialect,
-  SQLiteDialect,
-  BigQueryDialect,
-  DuckDbDialect,
-  ParserError,
-  dialectFromString,
-  SUPPORTED_DIALECTS,
-} from '../src';
+  parse,
+  parseOne,
+  format,
+  validate,
+  expectParseError,
+  dialects,
+  ensureWasmInitialized,
+  isQuery,
+  isInsert,
+  isUpdate,
+  isDelete,
+} from './test-utils';
+
+beforeAll(async () => {
+  await ensureWasmInitialized();
+});
 
 describe('Parser', () => {
-  describe('parse', () => {
-    it('should parse a simple SELECT statement', async () => {
-      const statements = await Parser.parse('SELECT 1', new GenericDialect());
-      expect(statements).toHaveLength(1);
-      expect(statements[0]).toHaveProperty('Query');
+  describe('basic parsing', () => {
+    test('parses simple SELECT', async () => {
+      const stmt = await parseOne('SELECT 1');
+      expect(isQuery(stmt)).toBe(true);
     });
 
-    it('should parse SELECT with columns', async () => {
-      const statements = await Parser.parse(
-        'SELECT id, name FROM users',
-        new GenericDialect()
-      );
-      expect(statements).toHaveLength(1);
+    test('parses SELECT with FROM', async () => {
+      const stmt = await parseOne('SELECT * FROM users');
+      expect(isQuery(stmt)).toBe(true);
     });
 
-    it('should parse SELECT with WHERE clause', async () => {
-      const statements = await Parser.parse(
-        "SELECT * FROM users WHERE id = 1 AND name = 'test'",
-        new GenericDialect()
-      );
-      expect(statements).toHaveLength(1);
+    test('parses SELECT with WHERE', async () => {
+      const stmt = await parseOne('SELECT * FROM users WHERE id = 1');
+      expect(isQuery(stmt)).toBe(true);
     });
 
-    it('should parse multiple statements', async () => {
-      const statements = await Parser.parse(
-        'SELECT 1; SELECT 2; SELECT 3',
-        new GenericDialect()
-      );
+    test('parses multiple statements', async () => {
+      const statements = await parse('SELECT 1; SELECT 2; SELECT 3');
       expect(statements).toHaveLength(3);
     });
 
-    it('should parse INSERT statement', async () => {
-      const statements = await Parser.parse(
-        "INSERT INTO users (name) VALUES ('Alice')",
-        new GenericDialect()
-      );
-      expect(statements).toHaveLength(1);
-      expect(statements[0]).toHaveProperty('Insert');
+    test('parses INSERT', async () => {
+      const stmt = await parseOne('INSERT INTO users (name) VALUES (\'test\')');
+      expect(isInsert(stmt)).toBe(true);
     });
 
-    it('should parse UPDATE statement', async () => {
-      const statements = await Parser.parse(
-        "UPDATE users SET name = 'Bob' WHERE id = 1",
-        new GenericDialect()
-      );
-      expect(statements).toHaveLength(1);
-      expect(statements[0]).toHaveProperty('Update');
+    test('parses UPDATE', async () => {
+      const stmt = await parseOne('UPDATE users SET name = \'test\' WHERE id = 1');
+      expect(isUpdate(stmt)).toBe(true);
     });
 
-    it('should parse DELETE statement', async () => {
-      const statements = await Parser.parse(
-        'DELETE FROM users WHERE id = 1',
-        new GenericDialect()
-      );
-      expect(statements).toHaveLength(1);
-      expect(statements[0]).toHaveProperty('Delete');
-    });
-
-    it('should parse CREATE TABLE statement', async () => {
-      const statements = await Parser.parse(
-        'CREATE TABLE users (id INT PRIMARY KEY, name VARCHAR(100))',
-        new GenericDialect()
-      );
-      expect(statements).toHaveLength(1);
-      expect(statements[0]).toHaveProperty('CreateTable');
-    });
-  });
-
-  describe('parse with different dialects', () => {
-    it('should parse PostgreSQL-specific syntax', async () => {
-      const statements = await Parser.parse(
-        "SELECT * FROM users WHERE id = $1 AND name ILIKE '%test%'",
-        new PostgreSqlDialect()
-      );
-      expect(statements).toHaveLength(1);
-    });
-
-    it('should parse MySQL-specific syntax', async () => {
-      const statements = await Parser.parse(
-        'SELECT * FROM users LIMIT 10, 5',
-        new MySqlDialect()
-      );
-      expect(statements).toHaveLength(1);
-    });
-
-    it('should parse SQLite-specific syntax', async () => {
-      const statements = await Parser.parse(
-        'SELECT * FROM users WHERE id = ?',
-        new SQLiteDialect()
-      );
-      expect(statements).toHaveLength(1);
-    });
-
-    it('should parse BigQuery-specific syntax', async () => {
-      const statements = await Parser.parse(
-        'SELECT * FROM `project.dataset.table`',
-        new BigQueryDialect()
-      );
-      expect(statements).toHaveLength(1);
-    });
-
-    it('should parse DuckDB-specific syntax', async () => {
-      const statements = await Parser.parse(
-        'SELECT * FROM read_csv_auto("file.csv")',
-        new DuckDbDialect()
-      );
-      expect(statements).toHaveLength(1);
-    });
-  });
-
-  describe('parseToJson', () => {
-    it('should return JSON string', async () => {
-      const json = await Parser.parseToJson('SELECT 1', new GenericDialect());
-      expect(typeof json).toBe('string');
-      const parsed = JSON.parse(json);
-      expect(Array.isArray(parsed)).toBe(true);
-      expect(parsed).toHaveLength(1);
-    });
-  });
-
-  describe('parseToString', () => {
-    it('should return string representation', async () => {
-      const str = await Parser.parseToString('SELECT 1', new GenericDialect());
-      expect(typeof str).toBe('string');
-      expect(str).toContain('SELECT');
+    test('parses DELETE', async () => {
+      const stmt = await parseOne('DELETE FROM users WHERE id = 1');
+      expect(isDelete(stmt)).toBe(true);
     });
   });
 
   describe('format', () => {
-    it('should format SQL', async () => {
-      const formatted = await Parser.format(
-        'select   *   from   users',
-        new GenericDialect()
-      );
+    test('formats SELECT statement', async () => {
+      const formatted = await format('select   *   from   users');
       expect(formatted).toBe('SELECT * FROM users');
     });
 
-    it('should format complex SQL', async () => {
-      const formatted = await Parser.format(
-        "select id,name from users where id=1 and name='test'",
-        new GenericDialect()
+    test('formats complex SELECT', async () => {
+      const formatted = await format(
+        'select a,b,c from t1 join t2 on t1.id=t2.id where a>1'
       );
       expect(formatted).toContain('SELECT');
-      expect(formatted).toContain('FROM');
-      expect(formatted).toContain('WHERE');
+      expect(formatted).toContain('JOIN');
     });
   });
 
   describe('validate', () => {
-    it('should return true for valid SQL', async () => {
-      const isValid = await Parser.validate('SELECT 1', new GenericDialect());
+    test('validates correct SQL', async () => {
+      const isValid = await validate('SELECT * FROM users');
       expect(isValid).toBe(true);
     });
 
-    it('should throw for invalid SQL', async () => {
-      await expect(
-        Parser.validate('SELEC * FROM', new GenericDialect())
-      ).rejects.toThrow();
+    test('rejects invalid SQL', async () => {
+      await expect(validate('SELEC * FROM')).rejects.toThrow();
     });
   });
 
   describe('error handling', () => {
-    it('should throw ParserError for invalid SQL', async () => {
-      try {
-        await Parser.parse('INVALID SQL SYNTAX HERE', new GenericDialect());
-        fail('Should have thrown an error');
-      } catch (error) {
-        expect(error).toBeInstanceOf(ParserError);
-        expect((error as ParserError).message).toBeTruthy();
-      }
+    test('throws on invalid SQL', async () => {
+      const error = await expectParseError('SELECT * FORM users');
+      expect(error).toBeDefined();
     });
 
-    it('should throw ParserError for incomplete SQL', async () => {
-      try {
-        await Parser.parse('SELECT * FROM', new GenericDialect());
-        fail('Should have thrown an error');
-      } catch (error) {
-        expect(error).toBeInstanceOf(ParserError);
-      }
+    test('throws on incomplete SQL', async () => {
+      const error = await expectParseError('SELECT');
+      expect(error).toBeDefined();
+    });
+
+    test('throws on unmatched parentheses', async () => {
+      const error = await expectParseError('SELECT (1 + 2');
+      expect(error).toBeDefined();
     });
   });
 
-  describe('Parser instance with options', () => {
-    it('should respect recursion limit', async () => {
-      const parser = new Parser(new GenericDialect()).withRecursionLimit(10);
-      const statements = await parser.parseAsync('SELECT 1');
-      expect(statements).toHaveLength(1);
+  describe('dialect-specific parsing', () => {
+    test('parses MySQL backtick identifiers', async () => {
+      const stmt = await parseOne('SELECT `column` FROM `table`', dialects.mysql);
+      expect(isQuery(stmt)).toBe(true);
     });
 
-    it('should chain options', async () => {
-      const parser = new Parser(new PostgreSqlDialect())
-        .withRecursionLimit(50)
-        .withOptions({ trailingCommas: true });
-
-      const statements = await parser.parseAsync('SELECT 1');
-      expect(statements).toHaveLength(1);
-    });
-  });
-});
-
-describe('Dialects', () => {
-  describe('dialectFromString', () => {
-    it('should create dialect from string', () => {
-      const dialect = dialectFromString('postgresql');
-      expect(dialect).toBeDefined();
-      expect(dialect?.name).toBe('postgresql');
+    test('parses PostgreSQL double-colon cast', async () => {
+      const stmt = await parseOne('SELECT 1::INTEGER', dialects.postgresql);
+      expect(isQuery(stmt)).toBe(true);
     });
 
-    it('should handle aliases', () => {
-      const pgDialect = dialectFromString('postgres');
-      expect(pgDialect?.name).toBe('postgresql');
-
-      const mssqlDialect = dialectFromString('sqlserver');
-      expect(mssqlDialect?.name).toBe('mssql');
+    test('parses MSSQL square bracket identifiers', async () => {
+      const stmt = await parseOne('SELECT [column] FROM [table]', dialects.mssql);
+      expect(isQuery(stmt)).toBe(true);
     });
 
-    it('should return undefined for unknown dialect', () => {
-      const dialect = dialectFromString('unknown_dialect');
-      expect(dialect).toBeUndefined();
-    });
-
-    it('should be case-insensitive', () => {
-      const dialect = dialectFromString('PostgreSQL');
-      expect(dialect).toBeDefined();
-      expect(dialect?.name).toBe('postgresql');
-    });
-  });
-
-  describe('SUPPORTED_DIALECTS', () => {
-    it('should contain all supported dialects', () => {
-      expect(SUPPORTED_DIALECTS).toContain('generic');
-      expect(SUPPORTED_DIALECTS).toContain('postgresql');
-      expect(SUPPORTED_DIALECTS).toContain('mysql');
-      expect(SUPPORTED_DIALECTS).toContain('sqlite');
-      expect(SUPPORTED_DIALECTS).toContain('bigquery');
-      expect(SUPPORTED_DIALECTS).toContain('snowflake');
+    test('parses BigQuery backtick identifiers', async () => {
+      const stmt = await parseOne('SELECT * FROM `project.dataset.table`', dialects.bigquery);
+      expect(isQuery(stmt)).toBe(true);
     });
   });
 });
 
-describe('Complex SQL parsing', () => {
-  it('should parse JOIN queries', async () => {
-    const statements = await Parser.parse(
-      `SELECT u.id, u.name, o.order_id
-       FROM users u
-       LEFT JOIN orders o ON u.id = o.user_id
-       WHERE o.status = 'active'`,
-      new GenericDialect()
-    );
-    expect(statements).toHaveLength(1);
+describe('Numeric Literals', () => {
+  test('parses integer', async () => {
+    await parseOne('SELECT 123');
   });
 
-  it('should parse subqueries', async () => {
-    const statements = await Parser.parse(
-      `SELECT * FROM users WHERE id IN (SELECT user_id FROM orders)`,
-      new GenericDialect()
-    );
-    expect(statements).toHaveLength(1);
+  test('parses decimal', async () => {
+    await parseOne('SELECT 123.456');
   });
 
-  it('should parse CTEs', async () => {
-    const statements = await Parser.parse(
-      `WITH active_users AS (
-         SELECT * FROM users WHERE status = 'active'
-       )
-       SELECT * FROM active_users`,
-      new GenericDialect()
-    );
-    expect(statements).toHaveLength(1);
+  test('parses scientific notation', async () => {
+    await parseOne('SELECT 1e10');
+    await parseOne('SELECT 1E10');
+    await parseOne('SELECT 1e-10');
+    await parseOne('SELECT 1.5e+10');
   });
 
-  it('should parse window functions', async () => {
-    const statements = await Parser.parse(
-      `SELECT id, name,
-              ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) as rank
-       FROM employees`,
-      new GenericDialect()
-    );
-    expect(statements).toHaveLength(1);
+  test('parses negative numbers', async () => {
+    await parseOne('SELECT -123');
+    await parseOne('SELECT -123.456');
+  });
+});
+
+describe('String Literals', () => {
+  test('parses single-quoted strings', async () => {
+    await parseOne("SELECT 'hello'");
   });
 
-  it('should parse CASE expressions', async () => {
-    const statements = await Parser.parse(
-      `SELECT id,
-              CASE WHEN status = 'active' THEN 1
-                   WHEN status = 'inactive' THEN 0
-                   ELSE -1
-              END as status_code
-       FROM users`,
-      new GenericDialect()
-    );
-    expect(statements).toHaveLength(1);
+  test('parses escaped single quotes', async () => {
+    await parseOne("SELECT 'it''s a test'");
   });
 
-  it('should parse UNION queries', async () => {
-    const statements = await Parser.parse(
-      `SELECT id, name FROM users
-       UNION ALL
-       SELECT id, name FROM archived_users`,
-      new GenericDialect()
-    );
-    expect(statements).toHaveLength(1);
+  test('parses empty string', async () => {
+    await parseOne("SELECT ''");
+  });
+});
+
+describe('Identifiers', () => {
+  test('parses simple identifiers', async () => {
+    await parseOne('SELECT foo FROM bar');
   });
 
-  it('should parse GROUP BY with HAVING', async () => {
-    const statements = await Parser.parse(
-      `SELECT department, COUNT(*) as count
-       FROM employees
-       GROUP BY department
-       HAVING COUNT(*) > 5
-       ORDER BY count DESC`,
-      new GenericDialect()
-    );
-    expect(statements).toHaveLength(1);
+  test('parses qualified identifiers', async () => {
+    await parseOne('SELECT schema.table.column FROM schema.table');
+  });
+
+  test('parses identifiers with underscores', async () => {
+    await parseOne('SELECT my_column FROM my_table');
+  });
+
+  test('parses identifiers starting with underscore', async () => {
+    await parseOne('SELECT _private FROM _table');
+  });
+});
+
+describe('Comments', () => {
+  test('parses single-line comment', async () => {
+    await parseOne('SELECT 1 -- this is a comment');
+  });
+
+  test('parses multi-line comment', async () => {
+    await parseOne('SELECT /* comment */ 1');
+  });
+
+  test('parses nested comments in some dialects', async () => {
+    // PostgreSQL and some other dialects support nested comments
+    await parseOne('SELECT /* outer /* inner */ outer */ 1', dialects.postgresql);
+  });
+});
+
+describe('Whitespace handling', () => {
+  test('handles extra whitespace', async () => {
+    await parseOne('SELECT   1   FROM   t');
+  });
+
+  test('handles newlines', async () => {
+    await parseOne('SELECT\n1\nFROM\nt');
+  });
+
+  test('handles tabs', async () => {
+    await parseOne('SELECT\t1\tFROM\tt');
+  });
+});
+
+describe('Case sensitivity', () => {
+  test('keywords are case-insensitive', async () => {
+    await parseOne('select * from users');
+    await parseOne('SELECT * FROM users');
+    await parseOne('Select * From Users');
+  });
+
+  test('identifiers preserve case', async () => {
+    const formatted = await format('SELECT MyColumn FROM MyTable');
+    expect(formatted).toContain('MyColumn');
+    expect(formatted).toContain('MyTable');
   });
 });

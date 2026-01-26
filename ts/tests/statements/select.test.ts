@@ -1,292 +1,448 @@
-import { Parser, GenericDialect } from '../../src';
+/**
+ * SELECT statement tests
+ * Comprehensive tests for SELECT statement parsing
+ */
 
-const dialect = new GenericDialect();
+import {
+  parse,
+  parseOne,
+  format,
+  expectParseError,
+  dialects,
+  ensureWasmInitialized,
+  isQuery,
+} from '../test-utils';
 
-describe('SELECT Statements', () => {
-  describe('basic', () => {
-    it('parses SELECT *', async () => {
-      const result = await Parser.parse('SELECT * FROM users', dialect);
-      expect(result).toHaveLength(1);
-    });
+beforeAll(async () => {
+  await ensureWasmInitialized();
+});
 
-    it('parses SELECT columns', async () => {
-      const result = await Parser.parse('SELECT id, name, email FROM users', dialect);
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses SELECT with alias', async () => {
-      const result = await Parser.parse('SELECT id AS user_id, name AS user_name FROM users u', dialect);
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses SELECT DISTINCT', async () => {
-      const result = await Parser.parse('SELECT DISTINCT name FROM users', dialect);
-      expect(result).toHaveLength(1);
-    });
+describe('SELECT - Basic', () => {
+  test('parse simple SELECT', async () => {
+    const stmt = await parseOne('SELECT 1');
+    expect(isQuery(stmt)).toBe(true);
   });
 
-  describe('WHERE', () => {
-    it('parses simple WHERE', async () => {
-      const result = await Parser.parse('SELECT * FROM users WHERE id = 1', dialect);
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses WHERE with AND/OR', async () => {
-      const result = await Parser.parse(
-        "SELECT * FROM users WHERE id = 1 AND name = 'test' OR status = 'active'",
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses WHERE IN', async () => {
-      const result = await Parser.parse('SELECT * FROM users WHERE id IN (1, 2, 3)', dialect);
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses WHERE BETWEEN', async () => {
-      const result = await Parser.parse('SELECT * FROM users WHERE age BETWEEN 18 AND 65', dialect);
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses WHERE LIKE', async () => {
-      const result = await Parser.parse("SELECT * FROM users WHERE name LIKE '%test%'", dialect);
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses WHERE IS NULL', async () => {
-      const result = await Parser.parse('SELECT * FROM users WHERE deleted_at IS NULL', dialect);
-      expect(result).toHaveLength(1);
-    });
+  test('parse SELECT with FROM', async () => {
+    await parseOne('SELECT * FROM t');
+    await parseOne('SELECT a, b, c FROM t');
+    await parseOne('SELECT t.* FROM t');
   });
 
-  describe('JOIN', () => {
-    it('parses INNER JOIN', async () => {
-      const result = await Parser.parse(
-        'SELECT * FROM users INNER JOIN orders ON users.id = orders.user_id',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses LEFT JOIN', async () => {
-      const result = await Parser.parse(
-        'SELECT * FROM users LEFT JOIN orders ON users.id = orders.user_id',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses RIGHT JOIN', async () => {
-      const result = await Parser.parse(
-        'SELECT * FROM users RIGHT JOIN orders ON users.id = orders.user_id',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses multiple JOINs', async () => {
-      const result = await Parser.parse(
-        `SELECT * FROM users
-         LEFT JOIN orders ON users.id = orders.user_id
-         LEFT JOIN products ON orders.product_id = products.id`,
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses CROSS JOIN', async () => {
-      const result = await Parser.parse('SELECT * FROM users CROSS JOIN products', dialect);
-      expect(result).toHaveLength(1);
-    });
+  test('parse SELECT with alias', async () => {
+    await parseOne('SELECT a AS alias FROM t');
+    await parseOne('SELECT a alias FROM t');
+    await parseOne('SELECT a "alias" FROM t');
   });
 
-  describe('GROUP BY / HAVING', () => {
-    it('parses GROUP BY', async () => {
-      const result = await Parser.parse(
-        'SELECT department, COUNT(*) FROM employees GROUP BY department',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses GROUP BY with HAVING', async () => {
-      const result = await Parser.parse(
-        'SELECT department, COUNT(*) as cnt FROM employees GROUP BY department HAVING COUNT(*) > 5',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses GROUP BY multiple columns', async () => {
-      const result = await Parser.parse(
-        'SELECT department, role, COUNT(*) FROM employees GROUP BY department, role',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
+  test('parse SELECT with table alias', async () => {
+    await parseOne('SELECT t.a FROM table1 t');
+    await parseOne('SELECT t.a FROM table1 AS t');
+    await parseOne('SELECT t.a, u.b FROM table1 t, table2 u');
   });
 
-  describe('ORDER BY / LIMIT', () => {
-    it('parses ORDER BY', async () => {
-      const result = await Parser.parse('SELECT * FROM users ORDER BY name', dialect);
-      expect(result).toHaveLength(1);
-    });
+  test('parse SELECT from multiple tables', async () => {
+    await parseOne('SELECT * FROM t1, t2');
+    await parseOne('SELECT * FROM t1, t2, t3');
+    await parseOne('SELECT t1.a, t2.b FROM t1, t2 WHERE t1.id = t2.id');
+  });
+});
 
-    it('parses ORDER BY DESC', async () => {
-      const result = await Parser.parse('SELECT * FROM users ORDER BY created_at DESC', dialect);
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses ORDER BY multiple columns', async () => {
-      const result = await Parser.parse(
-        'SELECT * FROM users ORDER BY last_name ASC, first_name ASC',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses LIMIT', async () => {
-      const result = await Parser.parse('SELECT * FROM users LIMIT 10', dialect);
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses LIMIT with OFFSET', async () => {
-      const result = await Parser.parse('SELECT * FROM users LIMIT 10 OFFSET 20', dialect);
-      expect(result).toHaveLength(1);
-    });
+describe('SELECT - DISTINCT', () => {
+  test('parse DISTINCT', async () => {
+    await parseOne('SELECT DISTINCT a FROM t');
+    await parseOne('SELECT DISTINCT a, b FROM t');
   });
 
-  describe('subqueries', () => {
-    it('parses subquery in WHERE', async () => {
-      const result = await Parser.parse(
-        'SELECT * FROM users WHERE id IN (SELECT user_id FROM orders)',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses subquery in FROM', async () => {
-      const result = await Parser.parse(
-        'SELECT * FROM (SELECT id, name FROM users) AS sub',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses correlated subquery', async () => {
-      const result = await Parser.parse(
-        `SELECT * FROM users u
-         WHERE EXISTS (SELECT 1 FROM orders o WHERE o.user_id = u.id)`,
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
+  test('parse ALL', async () => {
+    await parseOne('SELECT ALL a FROM t');
   });
 
-  describe('CTE', () => {
-    it('parses simple CTE', async () => {
-      const result = await Parser.parse(
-        `WITH active_users AS (SELECT * FROM users WHERE status = 'active')
-         SELECT * FROM active_users`,
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
+  test('parse DISTINCT ON (PostgreSQL)', async () => {
+    await parseOne('SELECT DISTINCT ON (a) * FROM t', dialects.postgresql);
+    await parseOne('SELECT DISTINCT ON (a, b) a, b, c FROM t', dialects.postgresql);
+  });
+});
 
-    it('parses multiple CTEs', async () => {
-      const result = await Parser.parse(
-        `WITH
-           active_users AS (SELECT * FROM users WHERE status = 'active'),
-           recent_orders AS (SELECT * FROM orders WHERE created_at > '2024-01-01')
-         SELECT * FROM active_users JOIN recent_orders ON active_users.id = recent_orders.user_id`,
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses recursive CTE', async () => {
-      const result = await Parser.parse(
-        `WITH RECURSIVE cte AS (
-           SELECT 1 AS n
-           UNION ALL
-           SELECT n + 1 FROM cte WHERE n < 10
-         )
-         SELECT * FROM cte`,
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
+describe('SELECT - WHERE', () => {
+  test('parse simple WHERE', async () => {
+    await parseOne('SELECT * FROM t WHERE a = 1');
+    await parseOne('SELECT * FROM t WHERE a > 1');
+    await parseOne('SELECT * FROM t WHERE a < 1');
+    await parseOne('SELECT * FROM t WHERE a >= 1');
+    await parseOne('SELECT * FROM t WHERE a <= 1');
+    await parseOne('SELECT * FROM t WHERE a <> 1');
+    await parseOne('SELECT * FROM t WHERE a != 1');
   });
 
-  describe('UNION', () => {
-    it('parses UNION', async () => {
-      const result = await Parser.parse(
-        'SELECT id, name FROM users UNION SELECT id, name FROM admins',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses UNION ALL', async () => {
-      const result = await Parser.parse(
-        'SELECT id, name FROM users UNION ALL SELECT id, name FROM admins',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses INTERSECT', async () => {
-      const result = await Parser.parse(
-        'SELECT id FROM users INTERSECT SELECT user_id FROM orders',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
-
-    it('parses EXCEPT', async () => {
-      const result = await Parser.parse(
-        'SELECT id FROM users EXCEPT SELECT user_id FROM banned_users',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
+  test('parse WHERE with AND/OR', async () => {
+    await parseOne('SELECT * FROM t WHERE a = 1 AND b = 2');
+    await parseOne('SELECT * FROM t WHERE a = 1 OR b = 2');
+    await parseOne('SELECT * FROM t WHERE a = 1 AND b = 2 OR c = 3');
+    await parseOne('SELECT * FROM t WHERE (a = 1 AND b = 2) OR c = 3');
   });
 
-  describe('window functions', () => {
-    it('parses ROW_NUMBER', async () => {
-      const result = await Parser.parse(
-        'SELECT id, ROW_NUMBER() OVER (ORDER BY id) AS rn FROM users',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
+  test('parse WHERE with NOT', async () => {
+    await parseOne('SELECT * FROM t WHERE NOT a = 1');
+    await parseOne('SELECT * FROM t WHERE NOT (a = 1 AND b = 2)');
+  });
 
-    it('parses PARTITION BY', async () => {
-      const result = await Parser.parse(
-        'SELECT id, ROW_NUMBER() OVER (PARTITION BY department ORDER BY salary DESC) AS rn FROM employees',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
+  test('parse WHERE with NULL checks', async () => {
+    await parseOne('SELECT * FROM t WHERE a IS NULL');
+    await parseOne('SELECT * FROM t WHERE a IS NOT NULL');
+  });
 
-    it('parses multiple window functions', async () => {
-      const result = await Parser.parse(
-        `SELECT id,
-           ROW_NUMBER() OVER (ORDER BY id) AS rn,
-           SUM(amount) OVER (PARTITION BY user_id) AS total
-         FROM orders`,
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
+  test('parse WHERE with BETWEEN', async () => {
+    await parseOne('SELECT * FROM t WHERE a BETWEEN 1 AND 10');
+    await parseOne('SELECT * FROM t WHERE a NOT BETWEEN 1 AND 10');
+  });
 
-    it('parses LEAD/LAG', async () => {
-      const result = await Parser.parse(
-        'SELECT id, LAG(amount, 1) OVER (ORDER BY created_at) AS prev_amount FROM orders',
-        dialect
-      );
-      expect(result).toHaveLength(1);
-    });
+  test('parse WHERE with IN', async () => {
+    await parseOne('SELECT * FROM t WHERE a IN (1, 2, 3)');
+    await parseOne('SELECT * FROM t WHERE a NOT IN (1, 2, 3)');
+    await parseOne('SELECT * FROM t WHERE a IN (SELECT b FROM t2)');
+  });
+
+  test('parse WHERE with LIKE', async () => {
+    await parseOne("SELECT * FROM t WHERE a LIKE 'pattern%'");
+    await parseOne("SELECT * FROM t WHERE a NOT LIKE 'pattern%'");
+    await parseOne("SELECT * FROM t WHERE a LIKE 'pat%' ESCAPE '\\\\'");
+  });
+
+  test('parse WHERE with EXISTS', async () => {
+    await parseOne('SELECT * FROM t WHERE EXISTS (SELECT 1 FROM t2)');
+    await parseOne('SELECT * FROM t WHERE NOT EXISTS (SELECT 1 FROM t2)');
+  });
+});
+
+describe('SELECT - ORDER BY', () => {
+  test('parse ORDER BY', async () => {
+    await parseOne('SELECT * FROM t ORDER BY a');
+    await parseOne('SELECT * FROM t ORDER BY a ASC');
+    await parseOne('SELECT * FROM t ORDER BY a DESC');
+    await parseOne('SELECT * FROM t ORDER BY a, b');
+    await parseOne('SELECT * FROM t ORDER BY a ASC, b DESC');
+  });
+
+  test('parse ORDER BY with NULLS', async () => {
+    await parseOne('SELECT * FROM t ORDER BY a NULLS FIRST');
+    await parseOne('SELECT * FROM t ORDER BY a NULLS LAST');
+    await parseOne('SELECT * FROM t ORDER BY a ASC NULLS FIRST');
+    await parseOne('SELECT * FROM t ORDER BY a DESC NULLS LAST');
+  });
+
+  test('parse ORDER BY with expression', async () => {
+    await parseOne('SELECT * FROM t ORDER BY a + b');
+    await parseOne('SELECT * FROM t ORDER BY CASE WHEN a > 0 THEN 1 ELSE 2 END');
+  });
+
+  test('parse ORDER BY with ordinal', async () => {
+    await parseOne('SELECT a, b FROM t ORDER BY 1');
+    await parseOne('SELECT a, b FROM t ORDER BY 1, 2');
+  });
+});
+
+describe('SELECT - GROUP BY', () => {
+  test('parse GROUP BY', async () => {
+    await parseOne('SELECT a, COUNT(*) FROM t GROUP BY a');
+    await parseOne('SELECT a, b, COUNT(*) FROM t GROUP BY a, b');
+  });
+
+  test('parse GROUP BY with expression', async () => {
+    await parseOne('SELECT YEAR(date), COUNT(*) FROM t GROUP BY YEAR(date)');
+  });
+
+  test('parse GROUP BY with ordinal', async () => {
+    await parseOne('SELECT a, COUNT(*) FROM t GROUP BY 1');
+  });
+
+  test('parse GROUP BY ROLLUP', async () => {
+    await parseOne('SELECT a, b, SUM(c) FROM t GROUP BY ROLLUP (a, b)');
+  });
+
+  test('parse GROUP BY CUBE', async () => {
+    await parseOne('SELECT a, b, SUM(c) FROM t GROUP BY CUBE (a, b)');
+  });
+
+  test('parse GROUP BY GROUPING SETS', async () => {
+    await parseOne('SELECT a, b, SUM(c) FROM t GROUP BY GROUPING SETS ((a), (b), (a, b), ())');
+  });
+});
+
+describe('SELECT - HAVING', () => {
+  test('parse HAVING', async () => {
+    await parseOne('SELECT a, COUNT(*) FROM t GROUP BY a HAVING COUNT(*) > 1');
+    await parseOne('SELECT a, SUM(b) FROM t GROUP BY a HAVING SUM(b) >= 100');
+  });
+});
+
+describe('SELECT - LIMIT/OFFSET', () => {
+  test('parse LIMIT', async () => {
+    await parseOne('SELECT * FROM t LIMIT 10');
+    await parseOne('SELECT * FROM t LIMIT 10 OFFSET 5');
+  });
+
+  test('parse OFFSET', async () => {
+    await parseOne('SELECT * FROM t OFFSET 5');
+    await parseOne('SELECT * FROM t OFFSET 5 ROWS');
+  });
+
+  test('parse FETCH', async () => {
+    await parseOne('SELECT * FROM t FETCH FIRST 5 ROWS ONLY');
+    await parseOne('SELECT * FROM t FETCH NEXT 5 ROWS ONLY');
+    await parseOne('SELECT * FROM t OFFSET 10 ROWS FETCH FIRST 5 ROWS ONLY');
+    await parseOne('SELECT * FROM t FETCH FIRST 5 ROWS WITH TIES');
+  });
+});
+
+describe('SELECT - JOINs', () => {
+  test('parse INNER JOIN', async () => {
+    await parseOne('SELECT * FROM t1 JOIN t2 ON t1.id = t2.id');
+    await parseOne('SELECT * FROM t1 INNER JOIN t2 ON t1.id = t2.id');
+  });
+
+  test('parse LEFT JOIN', async () => {
+    await parseOne('SELECT * FROM t1 LEFT JOIN t2 ON t1.id = t2.id');
+    await parseOne('SELECT * FROM t1 LEFT OUTER JOIN t2 ON t1.id = t2.id');
+  });
+
+  test('parse RIGHT JOIN', async () => {
+    await parseOne('SELECT * FROM t1 RIGHT JOIN t2 ON t1.id = t2.id');
+    await parseOne('SELECT * FROM t1 RIGHT OUTER JOIN t2 ON t1.id = t2.id');
+  });
+
+  test('parse FULL JOIN', async () => {
+    await parseOne('SELECT * FROM t1 FULL JOIN t2 ON t1.id = t2.id');
+    await parseOne('SELECT * FROM t1 FULL OUTER JOIN t2 ON t1.id = t2.id');
+  });
+
+  test('parse CROSS JOIN', async () => {
+    await parseOne('SELECT * FROM t1 CROSS JOIN t2');
+  });
+
+  test('parse NATURAL JOIN', async () => {
+    await parseOne('SELECT * FROM t1 NATURAL JOIN t2');
+    await parseOne('SELECT * FROM t1 NATURAL LEFT JOIN t2');
+  });
+
+  test('parse JOIN with USING', async () => {
+    await parseOne('SELECT * FROM t1 JOIN t2 USING (id)');
+    await parseOne('SELECT * FROM t1 JOIN t2 USING (id, name)');
+  });
+
+  test('parse multiple JOINs', async () => {
+    await parseOne('SELECT * FROM t1 JOIN t2 ON t1.id = t2.id JOIN t3 ON t2.id = t3.id');
+    await parseOne('SELECT * FROM t1 LEFT JOIN t2 ON t1.id = t2.id RIGHT JOIN t3 ON t2.id = t3.id');
+  });
+
+  test('parse self JOIN', async () => {
+    await parseOne('SELECT * FROM t t1 JOIN t t2 ON t1.parent_id = t2.id');
+  });
+});
+
+describe('SELECT - Subqueries', () => {
+  test('parse scalar subquery', async () => {
+    await parseOne('SELECT (SELECT MAX(a) FROM t2) FROM t1');
+  });
+
+  test('parse subquery in FROM', async () => {
+    await parseOne('SELECT * FROM (SELECT a, b FROM t) AS sub');
+    await parseOne('SELECT * FROM (SELECT a, b FROM t) sub');
+  });
+
+  test('parse subquery in WHERE', async () => {
+    await parseOne('SELECT * FROM t WHERE a IN (SELECT b FROM t2)');
+    await parseOne('SELECT * FROM t WHERE a = (SELECT MAX(b) FROM t2)');
+  });
+
+  test('parse correlated subquery', async () => {
+    await parseOne('SELECT * FROM t1 WHERE EXISTS (SELECT 1 FROM t2 WHERE t2.id = t1.id)');
+  });
+});
+
+describe('SELECT - CTEs', () => {
+  test('parse simple CTE', async () => {
+    await parseOne('WITH cte AS (SELECT 1) SELECT * FROM cte');
+  });
+
+  test('parse multiple CTEs', async () => {
+    await parseOne('WITH cte1 AS (SELECT 1), cte2 AS (SELECT 2) SELECT * FROM cte1, cte2');
+  });
+
+  test('parse recursive CTE', async () => {
+    await parseOne(`
+      WITH RECURSIVE cte AS (
+        SELECT 1 AS n
+        UNION ALL
+        SELECT n + 1 FROM cte WHERE n < 10
+      )
+      SELECT * FROM cte
+    `);
+  });
+
+  test('parse CTE with column list', async () => {
+    await parseOne('WITH cte (a, b) AS (SELECT 1, 2) SELECT * FROM cte');
+  });
+});
+
+describe('SELECT - Set Operations', () => {
+  test('parse UNION', async () => {
+    await parseOne('SELECT 1 UNION SELECT 2');
+    await parseOne('SELECT 1 UNION ALL SELECT 2');
+    await parseOne('SELECT 1 UNION DISTINCT SELECT 2');
+  });
+
+  test('parse INTERSECT', async () => {
+    await parseOne('SELECT 1 INTERSECT SELECT 2');
+    await parseOne('SELECT 1 INTERSECT ALL SELECT 2');
+  });
+
+  test('parse EXCEPT', async () => {
+    await parseOne('SELECT 1 EXCEPT SELECT 2');
+    await parseOne('SELECT 1 EXCEPT ALL SELECT 2');
+  });
+
+  test('parse multiple set operations', async () => {
+    await parseOne('SELECT 1 UNION SELECT 2 UNION SELECT 3');
+    await parseOne('SELECT 1 UNION SELECT 2 INTERSECT SELECT 3');
+    await parseOne('(SELECT 1) UNION (SELECT 2) EXCEPT (SELECT 3)');
+  });
+});
+
+describe('SELECT - Window Functions', () => {
+  test('parse window function', async () => {
+    await parseOne('SELECT ROW_NUMBER() OVER () FROM t');
+    await parseOne('SELECT RANK() OVER (ORDER BY a) FROM t');
+    await parseOne('SELECT DENSE_RANK() OVER (PARTITION BY b ORDER BY a) FROM t');
+  });
+
+  test('parse window function with frame', async () => {
+    await parseOne('SELECT SUM(a) OVER (ORDER BY b ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) FROM t');
+    await parseOne('SELECT AVG(a) OVER (ORDER BY b ROWS BETWEEN 1 PRECEDING AND 1 FOLLOWING) FROM t');
+    await parseOne('SELECT SUM(a) OVER (ORDER BY b RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW) FROM t');
+  });
+
+  test('parse named window', async () => {
+    await parseOne('SELECT SUM(a) OVER w FROM t WINDOW w AS (PARTITION BY b ORDER BY c)');
+    await parseOne('SELECT SUM(a) OVER w1, AVG(a) OVER w2 FROM t WINDOW w1 AS (ORDER BY a), w2 AS (ORDER BY b)');
+  });
+
+  test('parse aggregate with window', async () => {
+    await parseOne('SELECT SUM(a) OVER (PARTITION BY b) FROM t');
+    await parseOne('SELECT COUNT(*) OVER (ORDER BY a ROWS UNBOUNDED PRECEDING) FROM t');
+  });
+});
+
+describe('SELECT - CASE Expression', () => {
+  test('parse simple CASE', async () => {
+    await parseOne("SELECT CASE a WHEN 1 THEN 'one' WHEN 2 THEN 'two' ELSE 'other' END FROM t");
+  });
+
+  test('parse searched CASE', async () => {
+    await parseOne("SELECT CASE WHEN a = 1 THEN 'one' WHEN a = 2 THEN 'two' ELSE 'other' END FROM t");
+  });
+
+  test('parse nested CASE', async () => {
+    await parseOne("SELECT CASE WHEN a = 1 THEN CASE WHEN b = 1 THEN 'aa' ELSE 'ab' END ELSE 'other' END FROM t");
+  });
+
+  test('parse CASE without ELSE', async () => {
+    await parseOne("SELECT CASE WHEN a = 1 THEN 'one' END FROM t");
+  });
+});
+
+describe('SELECT - Expressions', () => {
+  test('parse arithmetic expressions', async () => {
+    await parseOne('SELECT a + b FROM t');
+    await parseOne('SELECT a - b FROM t');
+    await parseOne('SELECT a * b FROM t');
+    await parseOne('SELECT a / b FROM t');
+    await parseOne('SELECT a % b FROM t');
+    await parseOne('SELECT a + b * c FROM t');
+    await parseOne('SELECT (a + b) * c FROM t');
+  });
+
+  test('parse comparison expressions', async () => {
+    await parseOne('SELECT a = b FROM t');
+    await parseOne('SELECT a <> b FROM t');
+    await parseOne('SELECT a > b FROM t');
+    await parseOne('SELECT a < b FROM t');
+  });
+
+  test('parse logical expressions', async () => {
+    await parseOne('SELECT a AND b FROM t');
+    await parseOne('SELECT a OR b FROM t');
+    await parseOne('SELECT NOT a FROM t');
+  });
+
+  test('parse IS expressions', async () => {
+    await parseOne('SELECT a IS NULL FROM t');
+    await parseOne('SELECT a IS NOT NULL FROM t');
+    await parseOne('SELECT a IS TRUE FROM t');
+    await parseOne('SELECT a IS FALSE FROM t');
+    await parseOne('SELECT a IS UNKNOWN FROM t');
+    await parseOne('SELECT a IS DISTINCT FROM b FROM t');
+  });
+
+  test('parse string concatenation', async () => {
+    await parseOne("SELECT 'hello' || 'world' FROM t");
+    await parseOne("SELECT a || b || c FROM t");
+  });
+});
+
+describe('SELECT - Functions', () => {
+  test('parse aggregate functions', async () => {
+    await parseOne('SELECT COUNT(*) FROM t');
+    await parseOne('SELECT COUNT(a) FROM t');
+    await parseOne('SELECT COUNT(DISTINCT a) FROM t');
+    await parseOne('SELECT SUM(a) FROM t');
+    await parseOne('SELECT AVG(a) FROM t');
+    await parseOne('SELECT MIN(a) FROM t');
+    await parseOne('SELECT MAX(a) FROM t');
+  });
+
+  test('parse scalar functions', async () => {
+    await parseOne('SELECT UPPER(a) FROM t');
+    await parseOne('SELECT LOWER(a) FROM t');
+    await parseOne('SELECT LENGTH(a) FROM t');
+    await parseOne('SELECT SUBSTRING(a, 1, 3) FROM t');
+    await parseOne('SELECT COALESCE(a, b, c) FROM t');
+    await parseOne('SELECT NULLIF(a, b) FROM t');
+  });
+
+  test('parse date/time functions', async () => {
+    await parseOne('SELECT CURRENT_DATE');
+    await parseOne('SELECT CURRENT_TIME');
+    await parseOne('SELECT CURRENT_TIMESTAMP');
+    await parseOne('SELECT EXTRACT(YEAR FROM a) FROM t');
+  });
+});
+
+describe('SELECT - Type Casting', () => {
+  test('parse CAST', async () => {
+    await parseOne('SELECT CAST(a AS INT) FROM t');
+    await parseOne('SELECT CAST(a AS VARCHAR(100)) FROM t');
+    await parseOne("SELECT CAST('2023-01-01' AS DATE) FROM t");
+  });
+
+  test('parse TRY_CAST', async () => {
+    await parseOne('SELECT TRY_CAST(a AS INT) FROM t');
+  });
+
+  test('parse PostgreSQL double-colon cast', async () => {
+    await parseOne('SELECT a::INT FROM t', dialects.postgresql);
+    await parseOne("SELECT '2023-01-01'::DATE FROM t", dialects.postgresql);
+  });
+});
+
+describe('SELECT - Qualified References', () => {
+  test('parse qualified column', async () => {
+    await parseOne('SELECT t.a FROM t');
+    await parseOne('SELECT schema.t.a FROM schema.t');
+  });
+
+  test('parse qualified table', async () => {
+    await parseOne('SELECT * FROM schema.table1');
+    await parseOne('SELECT * FROM catalog.schema.table1');
   });
 });

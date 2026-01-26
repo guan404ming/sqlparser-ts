@@ -58,6 +58,7 @@ export {
   DuckDbDialect,
   DatabricksDialect,
   HiveDialect,
+  OracleDialect,
   dialectFromString,
   SUPPORTED_DIALECTS,
 } from './dialects';

@@ -1,6 +1,6 @@
 {
   "name": "sqlparser-rs",
-  "version": "0.60.0-rc3",
+  "version": "0.60.0-rc4",
   "description": "A SQL parser for JavaScript and TypeScript, powered by datafusion-sqlparser-rs via WASM",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -19,14 +19,14 @@
   ],
   "scripts": {
     "build": "npm run build:wasm && npm run build:ts",
-    "build:wasm": "cd .. && wasm-pack build --target nodejs --out-dir ts/wasm",
+    "build:wasm": "cd .. && wasm-pack build --target nodejs --out-dir ts/wasm && rm -f ts/wasm/.gitignore",
     "build:wasm:web": "cd .. && wasm-pack build --target web --out-dir ts/wasm-web",
     "build:ts": "npm run build:esm && npm run build:cjs",
     "build:esm": "tsc -p tsconfig.esm.json",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "lint": "eslint src tests --ext .ts",
-    "lint:fix": "eslint src tests --ext .ts --fix",
+    "lint": "eslint src tests",
+    "lint:fix": "eslint src tests --fix",
     "prepublishOnly": "npm run build",
     "local:pack": "npm run build:ts && npm pack",
     "local:link": "npm run build:ts && npm link"
@@ -47,14 +47,13 @@
     "url": "https://github.com/guan404ming/sqlparser-rs"
   },
   "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.0",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0",
-    "eslint": "^8.57.0",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.1.2",
-    "typescript": "^5.3.3"
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.10.0",
+    "eslint": "^9.18.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.2.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.21.0"
   },
   "engines": {
     "node": ">=16.0.0"

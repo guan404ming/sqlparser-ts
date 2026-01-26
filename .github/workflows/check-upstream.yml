@@ -1,0 +1,91 @@
+name: Check Upstream Updates
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get current version
+        id: current
+        run: |
+          CURRENT=$(grep 'sqlparser = { version' Cargo.toml | grep -oP '"\K[0-9.]+')
+          echo "version=$CURRENT" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT"
+
+      - name: Get latest upstream version
+        id: latest
+        run: |
+          LATEST=$(cargo search sqlparser --limit 1 | grep -oP 'sqlparser = "\K[^"]+')
+          echo "version=$LATEST" >> $GITHUB_OUTPUT
+          echo "Latest version: $LATEST"
+
+      - name: Compare versions
+        id: compare
+        run: |
+          if [ "${{ steps.current.outputs.version }}" != "${{ steps.latest.outputs.version }}" ]; then
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+            echo "🆕 New version available!"
+          else
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+            echo "✅ Already up to date"
+          fi
+
+      - name: Create issue for update
+        if: steps.compare.outputs.needs_update == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const current = '${{ steps.current.outputs.version }}';
+            const latest = '${{ steps.latest.outputs.version }}';
+
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'upstream-update'
+            });
+
+            const existingIssue = issues.data.find(i => i.title.includes(latest));
+            if (existingIssue) {
+              console.log('Issue already exists:', existingIssue.html_url);
+              return;
+            }
+
+            // Create new issue
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `⬆️ Upgrade to sqlparser v${latest}`,
+              labels: ['upstream-update'],
+              body: `## New upstream version available
+
+            | | Version |
+            |---|---|
+            | Current | \`${current}\` |
+            | Latest | \`${latest}\` |
+
+            ## Changelog
+
+            https://github.com/apache/datafusion-sqlparser-rs/releases/tag/v${latest}
+
+            ## Checklist
+
+            - [ ] Run \`./scripts/upgrade.sh ${latest}\`
+            - [ ] Check for new dialects
+            - [ ] Check for AST changes
+            - [ ] Update \`ts/src/types/ast.ts\` if needed
+            - [ ] Run \`./scripts/build.sh\`
+            - [ ] Run tests: \`cd ts && npm test\`
+            - [ ] Update README if needed
+            - [ ] Publish to npm
+            `
+            });
+
+            console.log('Created issue:', issue.data.html_url);

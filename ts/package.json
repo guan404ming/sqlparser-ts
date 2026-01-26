@@ -1,0 +1,54 @@
+{
+  "name": "sqlparser-rs",
+  "version": "0.60.0",
+  "description": "SQL parser for JavaScript/TypeScript - wraps the Rust sqlparser crate via WebAssembly",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "wasm"
+  ],
+  "scripts": {
+    "build": "npm run build:wasm && npm run build:ts",
+    "build:wasm": "cd .. && wasm-pack build --target nodejs --out-dir ts/wasm",
+    "build:wasm:web": "cd .. && wasm-pack build --target web --out-dir ts/wasm-web",
+    "build:ts": "npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "sql",
+    "parser",
+    "sqlparser",
+    "ast",
+    "wasm",
+    "webassembly",
+    "typescript"
+  ],
+  "author": "",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apache/datafusion-sqlparser-rs"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

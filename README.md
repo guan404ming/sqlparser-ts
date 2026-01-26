@@ -193,9 +193,11 @@ cd ts
 npm test
 ```
 
-## Version Compatibility
+## Version
 
-This package tracks the upstream sqlparser-rs version. The current version wraps sqlparser v0.60.0.
+| This package | sqlparser-rs |
+|--------------|--------------|
+| 0.60.0-x     | 0.60.0       |
 
 ## License
 

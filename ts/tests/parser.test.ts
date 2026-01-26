@@ -4,7 +4,6 @@ import {
   PostgreSqlDialect,
   MySqlDialect,
   SQLiteDialect,
-  SnowflakeDialect,
   BigQueryDialect,
   DuckDbDialect,
   ParserError,

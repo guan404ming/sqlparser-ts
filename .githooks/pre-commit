@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Format Rust code
+cargo fmt --check || {
+    echo "Run 'cargo fmt' to fix formatting"
+    exit 1
+}
+
+# Lint TypeScript (if ts/node_modules exists)
+if [ -d "ts/node_modules" ]; then
+    cd ts && npm run lint || exit 1
+fi

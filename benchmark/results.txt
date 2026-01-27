@@ -1,0 +1,28 @@
+Benchmark Results
+Generated: 2026-01-27 14:56:57 (UTC+08:00)
+Iterations: 10000
+
+## Package Size
+
+| Package          | Size      | Reduction       |
+|------------------|-----------|-----------------|
+| node-sql-parser  | 88.1 MB   | -               |
+| sqlparser-ts     | 6.3 MB    | 92.8% (13.9x) |
+
+Breakdown:
+| Package         | Component | Size      |
+|-----------------|-----------|-----------|
+| sqlparser-ts    | wasm/     | 6.3 MB    |
+| sqlparser-ts    | dist/     | 72.2 KB   |
+
+## Time by Command and Dialect
+
+| Command | Dialect    | sqlparser-ts | node-sql-parser | Speedup |
+|---------|------------|--------------|-----------------|---------|
+| Parse   | Mysql      | 55447 ms     | 104696 ms       | 1.89x   |
+| Parse   | Postgresql | 56611 ms     | 157169 ms       | 2.78x   |
+| Parse   | Sqlite     | 55747 ms     | 83347 ms        | 1.50x   |
+| Format  | Mysql      | 24944 ms     | 120569 ms       | 4.83x   |
+| Format  | Postgresql | 24480 ms     | 173734 ms       | 7.10x   |
+| Format  | Sqlite     | 23692 ms     | 95950 ms        | 4.05x   |
+

@@ -1,11 +1,10 @@
 /**
- * Test utilities for sqlparser-rs TypeScript tests
+ * Test utilities for sqlparser-ts TypeScript tests
  * Ported from the Rust test utilities
  */
 
 import {
   Parser,
-  initWasm,
   GenericDialect,
   MySqlDialect,
   PostgreSqlDialect,
@@ -24,29 +23,18 @@ import {
   type Statement,
 } from '../src';
 
-// Initialize WASM module before tests
-let wasmInitialized = false;
-
-export async function ensureWasmInitialized(): Promise<void> {
-  if (!wasmInitialized) {
-    await initWasm();
-    wasmInitialized = true;
-  }
-}
-
 /**
  * Parse SQL with the given dialect and return statements
  */
-export async function parse(sql: string, dialect: Dialect = new GenericDialect()): Promise<Statement[]> {
-  await ensureWasmInitialized();
+export function parse(sql: string, dialect: Dialect = new GenericDialect()): Statement[] {
   return Parser.parse(sql, dialect);
 }
 
 /**
  * Parse SQL and expect exactly one statement
  */
-export async function parseOne(sql: string, dialect: Dialect = new GenericDialect()): Promise<Statement> {
-  const statements = await parse(sql, dialect);
+export function parseOne(sql: string, dialect: Dialect = new GenericDialect()): Statement {
+  const statements = parse(sql, dialect);
   if (statements.length !== 1) {
     throw new Error(`Expected 1 statement, got ${statements.length}`);
   }
@@ -56,20 +44,18 @@ export async function parseOne(sql: string, dialect: Dialect = new GenericDialec
 /**
  * Parse SQL and verify it round-trips correctly (parse -> format -> parse)
  */
-export async function verifyRoundTrip(sql: string, dialect: Dialect = new GenericDialect()): Promise<void> {
-  await ensureWasmInitialized();
-  const formatted = await Parser.format(sql, dialect);
+export function verifyRoundTrip(sql: string, dialect: Dialect = new GenericDialect()): void {
+  const formatted = Parser.format(sql, dialect);
   // Parse the formatted SQL to ensure it's valid
-  await Parser.parse(formatted, dialect);
+  Parser.parse(formatted, dialect);
 }
 
 /**
  * Parse SQL and expect it to fail with an error
  */
-export async function expectParseError(sql: string, dialect: Dialect = new GenericDialect()): Promise<Error> {
-  await ensureWasmInitialized();
+export function expectParseError(sql: string, dialect: Dialect = new GenericDialect()): Error {
   try {
-    await Parser.parse(sql, dialect);
+    Parser.parse(sql, dialect);
     throw new Error(`Expected parse error for: ${sql}`);
   } catch (error) {
     if (error instanceof Error && error.message.includes('Expected parse error')) {
@@ -82,24 +68,21 @@ export async function expectParseError(sql: string, dialect: Dialect = new Gener
 /**
  * Validate that SQL is syntactically correct
  */
-export async function validate(sql: string, dialect: Dialect = new GenericDialect()): Promise<boolean> {
-  await ensureWasmInitialized();
+export function validate(sql: string, dialect: Dialect = new GenericDialect()): boolean {
   return Parser.validate(sql, dialect);
 }
 
 /**
  * Format SQL using the parser's format function
  */
-export async function format(sql: string, dialect: Dialect = new GenericDialect()): Promise<string> {
-  await ensureWasmInitialized();
+export function format(sql: string, dialect: Dialect = new GenericDialect()): string {
   return Parser.format(sql, dialect);
 }
 
 /**
  * Parse SQL to JSON string
  */
-export async function parseToJson(sql: string, dialect: Dialect = new GenericDialect()): Promise<string> {
-  await ensureWasmInitialized();
+export function parseToJson(sql: string, dialect: Dialect = new GenericDialect()): string {
   return Parser.parseToJson(sql, dialect);
 }
 
@@ -125,24 +108,24 @@ export const dialects = {
 /**
  * Test a SQL statement against multiple dialects
  */
-export async function testWithDialects(
+export function testWithDialects(
   sql: string,
   dialectList: Dialect[],
-  testFn: (statements: Statement[], dialect: Dialect) => void | Promise<void>
-): Promise<void> {
+  testFn: (statements: Statement[], dialect: Dialect) => void
+): void {
   for (const dialect of dialectList) {
-    const statements = await parse(sql, dialect);
-    await testFn(statements, dialect);
+    const statements = parse(sql, dialect);
+    testFn(statements, dialect);
   }
 }
 
 /**
  * Test that SQL parses successfully with all common dialects
  */
-export async function testAllDialects(
+export function testAllDialects(
   sql: string,
-  testFn?: (statements: Statement[], dialect: Dialect) => void | Promise<void>
-): Promise<void> {
+  testFn?: (statements: Statement[], dialect: Dialect) => void
+): void {
   const allDialects = [
     dialects.generic,
     dialects.mysql,
@@ -156,9 +139,9 @@ export async function testAllDialects(
 
   for (const dialect of allDialects) {
     try {
-      const statements = await parse(sql, dialect);
+      const statements = parse(sql, dialect);
       if (testFn) {
-        await testFn(statements, dialect);
+        testFn(statements, dialect);
       }
     } catch {
       // Some SQL may not be valid in all dialects, that's expected

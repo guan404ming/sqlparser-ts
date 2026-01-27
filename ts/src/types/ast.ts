@@ -1,5 +1,5 @@
 /**
- * TypeScript type definitions for sqlparser-rs AST
+ * TypeScript type definitions for sqlparser-ts AST
  *
  * These types mirror the Rust AST structure from the sqlparser crate.
  * The AST is serialized as JSON from Rust, so these types represent

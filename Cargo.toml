@@ -2,9 +2,9 @@
 name = "sqlparser-rs-wasm"
 version = "0.60.0-rc4"
 edition = "2021"
-description = "WebAssembly bindings for sqlparser-rs SQL parser"
+description = "WebAssembly bindings for sqlparser SQL parser"
 license = "Apache-2.0"
-repository = "https://github.com/guan404ming/sqlparser-rs"
+repository = "https://github.com/guanmingchiu/sqlparser-ts"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

@@ -1,6 +1,6 @@
 # SQL Parser Tests
 
-Comprehensive tests for the sqlparser-rs TypeScript wrapper, ported from [apache/datafusion-sqlparser-rs](https://github.com/apache/datafusion-sqlparser-rs).
+Comprehensive tests for the sqlparser-ts TypeScript wrapper, ported from [apache/datafusion-sqlparser-rs](https://github.com/apache/datafusion-sqlparser-rs).
 
 ## Running Tests
 

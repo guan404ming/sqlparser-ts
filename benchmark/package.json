@@ -1,0 +1,18 @@
+{
+  "name": "sqlparser-benchmark",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Benchmark comparing sqlparser-ts and node-sql-parser",
+  "scripts": {
+    "verify": "node cli.js verify",
+    "benchmark": "node cli.js benchmark",
+    "size": "node cli.js size",
+    "figures": "node cli.js figures",
+    "all": "node cli.js all",
+    "help": "node cli.js help"
+  },
+  "dependencies": {
+    "node-sql-parser": "^5.3.8",
+    "@guanmingchiu/sqlparser-ts": "file:../ts"
+  }
+}

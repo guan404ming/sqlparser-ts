@@ -7,8 +7,8 @@ Performance comparison between **sqlparser-ts** and **node-sql-parser**.
 | Metric | sqlparser-ts | node-sql-parser | Winner |
 |--------|-------------|-----------------|--------|
 | Package Size | **6.3 MB** | 88.1 MB | sqlparser-ts (**13.9x smaller**) |
-| Parse (avg) | **55,935 ms** | 115,071 ms | sqlparser-ts (**2.06x faster**) |
-| Format (avg) | **24,372 ms** | 130,084 ms | sqlparser-ts (**5.34x faster**) |
+| Parse (avg per call) | **34.3 μs** | 70.6 μs | sqlparser-ts (**2.06x faster**) |
+| Format (avg per call) | **14.9 μs** | 79.8 μs | sqlparser-ts (**5.35x faster**) |
 
 ## Test Configuration
 
@@ -74,7 +74,7 @@ cd benchmark
 npm install
 
 # Run all benchmarks, generate figures and update readme automatically
-node cli.js bench -i 1000
+node cli.js bench
 
 # Individual commands
 node cli.js verify              # Compare parser outputs

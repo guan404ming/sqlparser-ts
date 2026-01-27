@@ -652,8 +652,8 @@ Performance comparison between **sqlparser-ts** and **node-sql-parser**.
 | Metric | sqlparser-ts | node-sql-parser | Winner |
 |--------|-------------|-----------------|--------|
 | Package Size | **${formatSize(sizeResults.sqlparserRs)}** | ${formatSize(sizeResults.nodeSqlParser)} | sqlparser-ts (**${sizeResults.ratio}x smaller**) |
-| Parse (avg) | **${fmtMs(parseAvg.rs)}** | ${fmtMs(parseAvg.node)} | sqlparser-ts (**${(parseAvg.node / parseAvg.rs).toFixed(2)}x faster**) |
-| Format (avg) | **${fmtMs(formatAvg.rs)}** | ${fmtMs(formatAvg.node)} | sqlparser-ts (**${(formatAvg.node / formatAvg.rs).toFixed(2)}x faster**) |
+| Parse (avg per call) | **${fmtAvgCall(parseAvg.rs)}** | ${fmtAvgCall(parseAvg.node)} | sqlparser-ts (**${(parseAvg.node / parseAvg.rs).toFixed(2)}x faster**) |
+| Format (avg per call) | **${fmtAvgCall(formatAvg.rs)}** | ${fmtAvgCall(formatAvg.node)} | sqlparser-ts (**${(formatAvg.node / formatAvg.rs).toFixed(2)}x faster**) |
 
 ## Test Configuration
 
@@ -719,7 +719,7 @@ cd benchmark
 npm install
 
 # Run all benchmarks, generate figures and update readme automatically
-node cli.js bench -i 1000
+node cli.js bench
 
 # Individual commands
 node cli.js verify              # Compare parser outputs

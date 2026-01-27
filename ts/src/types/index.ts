@@ -1,2 +1,2 @@
-export * from './ast';
-export * from './errors';
+export * from './ast.js';
+export * from './errors.js';

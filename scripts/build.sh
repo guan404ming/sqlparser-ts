@@ -3,7 +3,7 @@
 set -e
 
 echo "=========================================="
-echo "Building sqlparser-rs npm package"
+echo "Building sqlparser-ts npm package"
 echo "=========================================="
 
 # Get the script directory
@@ -22,10 +22,19 @@ if ! command -v wasm-pack &> /dev/null; then
     exit 1
 fi
 
-# Build WASM for Node.ts
-echo "Step 1: Building WASM module for Node.ts..."
+# Build WASM for Node.js
+echo "Step 1a: Building WASM module for Node.js..."
 cd "$PROJECT_DIR"
-wasm-pack build --target nodets --out-dir ts/wasm
+wasm-pack build --target nodejs --out-dir ts/wasm
+
+# Build WASM for Web (browser)
+echo "Step 1b: Building WASM module for Web (browser)..."
+wasm-pack build --target web --out-dir ts/wasm-web
+
+# Copy web wasm files to wasm directory with _web suffix
+cp ts/wasm-web/sqlparser_rs_wasm.js ts/wasm/sqlparser_rs_wasm_web.js
+cp ts/wasm-web/sqlparser_rs_wasm_bg.wasm ts/wasm/sqlparser_rs_wasm_web_bg.wasm
+rm -rf ts/wasm-web
 
 echo ""
 echo "Step 2: Installing npm dependencies..."
@@ -34,8 +43,7 @@ npm install
 
 echo ""
 echo "Step 3: Building TypeScript..."
-npm run build:esm
-npm run build:cts
+npm run build:ts
 
 echo ""
 echo "=========================================="

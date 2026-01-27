@@ -3,6 +3,8 @@ name: CI
 on:
   push:
     branches: [main]
+    tags:
+      - 'v*'
   pull_request:
     branches: [main]
 
@@ -17,10 +19,9 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: wasm32-unknown-unknown
-          components: rustfmt
 
-      - name: Check Rust format
-        run: cargo fmt --check
+      - name: Cache Rust dependencies
+        uses: Swatinem/rust-cache@v2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -29,19 +30,23 @@ jobs:
           cache: 'npm'
           cache-dependency-path: ts/package-lock.json
 
-      - name: Install wasm-pack
-        run: cargo install wasm-pack
-
-      - name: Build WASM
-        run: wasm-pack build --target nodejs --out-dir ts/wasm
-
       - name: Install npm dependencies
         working-directory: ts
         run: npm ci
 
-      - name: Lint TypeScript
-        working-directory: ts
-        run: npm run lint
+      - name: Run pre-commit checks
+        run: ./.githooks/pre-commit
+
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Build WASM (Node.js and Web)
+        run: |
+          wasm-pack build --target nodejs --out-dir ts/wasm
+          wasm-pack build --target web --out-dir ts/wasm-web
+          cp ts/wasm-web/sqlparser_rs_wasm.js ts/wasm/sqlparser_rs_wasm_web.js
+          cp ts/wasm-web/sqlparser_rs_wasm_bg.wasm ts/wasm/sqlparser_rs_wasm_web_bg.wasm
+          rm -rf ts/wasm-web
 
       - name: Build TypeScript
         working-directory: ts
@@ -51,35 +56,49 @@ jobs:
         working-directory: ts
         run: npm test
 
+      - name: Upload build artifacts
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            ts/wasm/
+            ts/dist/
+            ts/package.json
+            ts/package-lock.json
+            ts/README.md
+          retention-days: 1
+
   publish:
     needs: build-and-test
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
         with:
-          targets: wasm32-unknown-unknown
+          name: build-artifacts
+          path: ts
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           registry-url: 'https://registry.npmjs.org'
-
-      - name: Install wasm-pack
-        run: cargo install wasm-pack
-
-      - name: Build
-        run: |
-          wasm-pack build --target nodejs --out-dir ts/wasm
-          cd ts && npm ci && npm run build:ts
 
       - name: Publish to npm
         working-directory: ts
-        run: npm publish
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          if [[ "$VERSION" == *"rc"* ]]; then
+            npm publish --access public --ignore-scripts --tag rc
+          else
+            npm publish --access public --ignore-scripts
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true

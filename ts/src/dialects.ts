@@ -153,20 +153,7 @@ const DIALECT_MAP: Record<DialectName, new () => Dialect> = {
   oracle: OracleDialect,
 };
 
-/**
- * Create a dialect instance from a string name
- *
- * @param name - The name of the dialect (case-insensitive)
- * @returns A dialect instance, or undefined if the dialect is not recognized
- *
- * @example
- * ```typescript
- * const dialect = dialectFromString('postgresql');
- * if (dialect) {
- *   const ast = Parser.parse('SELECT 1', dialect);
- * }
- * ```
- */
+/** Create a dialect instance from a string name (case-insensitive) */
 export function dialectFromString(name: string): Dialect | undefined {
   const normalized = name.toLowerCase() as DialectName;
 

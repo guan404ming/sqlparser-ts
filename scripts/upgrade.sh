@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Upgrade script for sqlparser-rs
+# Upgrade script for sqlparser-ts
 # Usage: ./scripts/upgrade.sh 0.61.0
 
 set -e

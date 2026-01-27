@@ -6,13 +6,13 @@ export default defineConfig({
     environment: 'node',
     include: ['tests/**/*.test.ts'],
     globals: true,
+    setupFiles: ['./tests/setup.ts'],
   },
   resolve: {
     alias: {
-      // Redirect src imports to dist/cjs for testing
-      '../src': path.resolve(__dirname, './dist/cjs/index.js'),
-      '../../src': path.resolve(__dirname, './dist/cjs/index.js'),
-      '../../../src': path.resolve(__dirname, './dist/cjs/index.js'),
+      '../src': path.resolve(__dirname, './dist/index.mjs'),
+      '../../src': path.resolve(__dirname, './dist/index.mjs'),
+      '../../../src': path.resolve(__dirname, './dist/index.mjs'),
     },
   },
 });

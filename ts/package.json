@@ -1,15 +1,16 @@
 {
-  "name": "sqlparser-rs",
+  "name": "@guanmingchiu/sqlparser-ts",
   "version": "0.60.0-rc4",
+  "type": "module",
   "description": "A SQL parser for JavaScript and TypeScript, powered by datafusion-sqlparser-rs via WASM",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/types/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     }
   },
   "files": [
@@ -21,9 +22,7 @@
     "build": "npm run build:wasm && npm run build:ts",
     "build:wasm": "cd .. && wasm-pack build --target nodejs --out-dir ts/wasm && rm -f ts/wasm/.gitignore",
     "build:wasm:web": "cd .. && wasm-pack build --target web --out-dir ts/wasm-web",
-    "build:ts": "npm run build:esm && npm run build:cjs",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:ts": "tsdown",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src tests",
@@ -45,13 +44,14 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/guan404ming/sqlparser-rs"
+    "url": "git+https://github.com/guan404ming/sqlparser-ts.git"
   },
   "devDependencies": {
     "@types/node": "^25.0.10",
     "@vitest/ui": "^4.0.18",
     "eslint": "^9.18.0",
     "eslint-plugin-unused-imports": "^4.3.0",
+    "tsdown": "^0.20.1",
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.21.0",
     "vitest": "^4.0.18"

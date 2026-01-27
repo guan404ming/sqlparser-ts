@@ -225,7 +225,7 @@ dependencies = [
 
 [[package]]
 name = "sqlparser-rs-wasm"
-version = "0.60.0-rc4"
+version = "0.60.0"
 dependencies = [
  "console_error_panic_hook",
  "serde",

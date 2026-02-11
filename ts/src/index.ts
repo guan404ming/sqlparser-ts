@@ -4,7 +4,7 @@
  */
 
 // Parser
-export { Parser, initWasm, ready, parse, validate, format } from './parser.js';
+export { Parser, init, parse, validate, format } from './parser.js';
 export type { ParserOptions, DialectInput } from './parser.js';
 
 // Dialects

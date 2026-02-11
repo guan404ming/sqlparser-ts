@@ -13,20 +13,8 @@ export interface WasmModule {
 
 let wasmModule: WasmModule | null = null;
 let initPromise: Promise<void> | null = null;
-let initStarted = false;
 
 const isBrowser = typeof window !== 'undefined' && typeof process === 'undefined';
-
-function startInit(): void {
-  if (initStarted) return;
-  initStarted = true;
-  initPromise = initWasm().catch(() => {
-    // Silently ignore init errors - they'll be thrown when APIs are used
-  });
-}
-
-// Start init on module load
-startInit();
 
 /** Get initialized WASM module or throw */
 export function getWasmModule(): WasmModule {
@@ -34,55 +22,42 @@ export function getWasmModule(): WasmModule {
     return wasmModule;
   }
   throw new WasmInitError(
-    'WASM module not yet initialized. Use the async import or wait for module to load: import("@guanmingchiu/sqlparser-ts").then(({ parse }) => parse(sql))'
+    'WASM module not yet initialized. Call `await init()` before using the parser.'
   );
 }
 
 /**
- * Wait for WASM module to be ready
+ * Initialize the WASM module. Must be called before using any parser functions.
+ * Safe to call multiple times, subsequent calls are no-ops.
  */
-export async function ready(): Promise<void> {
-  startInit();
-  await initPromise;
-}
-
-/**
- * Initialize the WASM module explicitly.
- * Usually not needed - the module auto-initializes on first use.
- */
-export async function initWasm(): Promise<void> {
+export async function init(): Promise<void> {
   if (wasmModule) {
     return;
   }
 
-  if (isBrowser) {
-    try {
-      const wasmJsUrl = new URL('../wasm/sqlparser_rs_wasm_web.js', import.meta.url);
-      const wasmBinaryUrl = new URL('../wasm/sqlparser_rs_wasm_web_bg.wasm', import.meta.url);
+  if (!initPromise) {
+    initPromise = (async () => {
+      try {
+        const wasm = await import(/* @vite-ignore */ '../wasm/sqlparser_rs_wasm.js');
 
-      const wasm = await import(/* @vite-ignore */ wasmJsUrl.href);
+        if (isBrowser) {
+          const wasmUrl = new URL('../wasm/sqlparser_rs_wasm_bg.wasm', import.meta.url);
+          await wasm.default({ module_or_path: wasmUrl });
+        } else {
+          const { readFile } = await import(/* @vite-ignore */ 'node:fs/promises');
+          const wasmPath = new URL('../wasm/sqlparser_rs_wasm_bg.wasm', import.meta.url);
+          const bytes = await readFile(wasmPath);
+          await wasm.default({ module_or_path: bytes });
+        }
 
-      if (typeof wasm.default === 'function') {
-        await wasm.default({ module_or_path: wasmBinaryUrl });
+        wasmModule = wasm as WasmModule;
+      } catch (error) {
+        throw new WasmInitError(
+          `Failed to load WASM module: ${error instanceof Error ? error.message : String(error)}`
+        );
       }
-
-      wasmModule = wasm as WasmModule;
-    } catch (error) {
-      throw new WasmInitError(
-        `Failed to load WASM module in browser: ${error instanceof Error ? error.message : String(error)}`
-      );
-    }
-    return;
+    })();
   }
 
-  // Node.js
-  try {
-    const wasmUrl = new URL('../wasm/sqlparser_rs_wasm.js', import.meta.url);
-    const wasm = await import(/* @vite-ignore */ wasmUrl.href);
-    wasmModule = wasm as WasmModule;
-  } catch (error) {
-    throw new WasmInitError(
-      `Failed to load WASM module: ${error instanceof Error ? error.message : String(error)}`
-    );
-  }
+  await initPromise;
 }

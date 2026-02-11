@@ -20,8 +20,7 @@
   ],
   "scripts": {
     "build": "npm run build:wasm && npm run build:ts",
-    "build:wasm": "cd .. && wasm-pack build --target nodejs --out-dir ts/wasm && rm -f ts/wasm/.gitignore",
-    "build:wasm:web": "cd .. && wasm-pack build --target web --out-dir ts/wasm-web",
+    "build:wasm": "cd .. && wasm-pack build --target web --out-dir ts/wasm && rm -f ts/wasm/.gitignore",
     "build:ts": "tsdown",
     "test": "vitest run",
     "test:watch": "vitest",

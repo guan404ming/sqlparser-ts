@@ -13,8 +13,8 @@ npm test -- --testNamePattern="SELECT"     # Run tests matching pattern
 ## Test Results
 
 ```
-Test Suites: 18 passed, 18 total (100%)
-Tests:       62 skipped, 856 passed, 918 total
+Test Suites: 19 passed, 19 total (100%)
+Tests:       56 skipped, 870 passed, 926 total
 Failures:    0 ✅
 ```
 
@@ -28,27 +28,25 @@ Failures:    0 ✅
 | BigQuery | ✅ Pass | 0 | Fully supported |
 | Snowflake | ✅ Pass | 4 | PUT/GET, TASK, STREAM |
 | DuckDB | ✅ Pass | 3 | Lambda, SAMPLE, ASOF |
-| MSSQL | ✅ Pass | 9 | Procedural features |
+| MSSQL | ✅ Pass | 8 | Procedural features |
 | SQLite | ✅ Pass | 4 | PRAGMA, GLOB, DETACH |
 | Redshift | ✅ Pass | 7 | DISTKEY, SORTKEY, ENCODE |
 | ClickHouse | ✅ Pass | 12 | PARTITION BY, TTL, ENGINE |
 | Hive | ✅ Pass | 6 | Complex types, TRANSFORM |
-| Oracle | ✅ Pass | 4 | Q quote strings (needs 0.61.0+) |
-| Databricks | ✅ Pass | 1 | Time travel (needs 0.61.0+) |
+| Oracle | ✅ Pass | 0 | Fully supported |
+| Databricks | ✅ Pass | 0 | Fully supported |
 
-## Skipped Tests (62 total)
+## Skipped Tests (56 total)
 
-**Dialect-specific features (52 tests):**
+**Dialect-specific features (46 tests):**
 - ClickHouse (12): PARTITION BY, SAMPLE BY, TTL, ARRAY JOIN, ENGINE, DICTIONARY, ALTER UPDATE/DELETE, SYSTEM
-- MSSQL (9): CURSOR, WHILE, BEGIN/END, TRY/CATCH, OUTPUT clause
+- MSSQL (8): CURSOR, WHILE, TRY/CATCH, OUTPUT clause
 - Redshift (7): DISTKEY, SORTKEY, DISTSTYLE, ENCODE, COPY options, CREATE EXTERNAL SCHEMA
 - Hive (6): ARRAY<>, MAP<>, STRUCT<>, TRANSFORM, CREATE INDEX, DESCRIBE DATABASE
 - Snowflake (4): PUT/GET, CREATE/ALTER TASK, CREATE STREAM
 - SQLite (4): PRAGMA, GLOB, DETACH DATABASE, ANALYZE
-- Oracle (4): Q quote strings (Q'...', NQ'...') - *coming in 0.61.0*
 - DuckDB (3): Lambda functions, SAMPLE, ASOF joins
 - PostgreSQL (2): VACUUM, ANALYZE
-- Databricks (1): Time travel (TIMESTAMP/VERSION AS OF) - *coming in 0.61.0*
 
 **Statement tests (10 tests):**
 - Parse errors (8): Parser leniency tests (e.g., JOIN without ON, missing alias)

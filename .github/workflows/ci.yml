@@ -5,8 +5,20 @@ on:
     branches: [main]
     tags:
       - 'v*'
+    paths:
+      - 'src/**'
+      - 'ts/**'
+      - 'Cargo.*'
+      - '.github/workflows/ci.yml'
+      - '.githooks/**'
   pull_request:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'ts/**'
+      - 'Cargo.*'
+      - '.github/workflows/ci.yml'
+      - '.githooks/**'
 
 jobs:
   build-and-test:

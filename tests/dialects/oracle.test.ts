@@ -12,14 +12,14 @@ import {
 const oracle = dialects.oracle;
 
 describe('Oracle - Operator Precedence', () => {
-  test('muldiv_have_higher_precedence_than_strconcat', () => {
+  test('parse_muldiv_higher_precedence_than_strconcat', () => {
     // Test that * and / have higher precedence than ||
     const sql = "SELECT 3 / 5 || 'asdf' || 7 * 9 FROM dual";
     const stmt = parseOne(sql, oracle);
     expect(stmt).toBeDefined();
   });
 
-  test('plusminus_have_same_precedence_as_strconcat', () => {
+  test('parse_plusminus_same_precedence_as_strconcat', () => {
     // Test that +, -, and || have the same precedence and are left-associative
     const sql = "SELECT 3 + 5 || '.3' || 7 - 9 FROM dual";
     const stmt = parseOne(sql, oracle);

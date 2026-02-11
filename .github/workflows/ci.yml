@@ -40,13 +40,8 @@ jobs:
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0
 
-      - name: Build WASM (Node.js and Web)
-        run: |
-          wasm-pack build --target nodejs --out-dir ts/wasm
-          wasm-pack build --target web --out-dir ts/wasm-web
-          cp ts/wasm-web/sqlparser_rs_wasm.js ts/wasm/sqlparser_rs_wasm_web.js
-          cp ts/wasm-web/sqlparser_rs_wasm_bg.wasm ts/wasm/sqlparser_rs_wasm_web_bg.wasm
-          rm -rf ts/wasm-web
+      - name: Build WASM
+        run: wasm-pack build --target web --out-dir ts/wasm
 
       - name: Build TypeScript
         working-directory: ts

@@ -13,6 +13,6 @@
   },
   "dependencies": {
     "node-sql-parser": "^5.3.8",
-    "@guanmingchiu/sqlparser-ts": "file:../ts"
+    "@guanmingchiu/sqlparser-ts": "file:.."
   }
 }

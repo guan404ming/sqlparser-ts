@@ -83,9 +83,9 @@ jobs:
             - [ ] Run \`./scripts/upgrade.sh ${latest}\`
             - [ ] Check for new dialects
             - [ ] Check for AST changes
-            - [ ] Update \`ts/src/types/ast.ts\` if needed
+            - [ ] Update \`src/types/ast.ts\` if needed
             - [ ] Run \`./scripts/build.sh\`
-            - [ ] Run tests: \`cd ts && npm test\`
+            - [ ] Run tests: \`npm test\`
             - [ ] Update README if needed
             - [ ] Publish to npm
             `

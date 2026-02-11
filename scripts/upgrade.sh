@@ -21,12 +21,10 @@ sed -i '' "s/sqlparser = { version = \"[^\"]*\"/sqlparser = { version = \"${VERS
 sed -i '' "s/^version = \"[^\"]*\"/version = \"${VERSION}\"/" "$PROJECT_DIR/Cargo.toml"
 
 # Update package.json
-sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" "$PROJECT_DIR/ts/package.json"
+sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" "$PROJECT_DIR/package.json"
 
 # Update README badge
-README=$(readlink -f "$PROJECT_DIR/README.md" 2>/dev/null || readlink "$PROJECT_DIR/README.md")
-[[ "$README" != /* ]] && README="$PROJECT_DIR/$README"
-sed -i '' "s/sqlparser--rs-v[0-9.]*-orange/sqlparser--rs-v${VERSION}-orange/" "$README"
+sed -i '' "s/sqlparser--rs-v[0-9.]*-orange/sqlparser--rs-v${VERSION}-orange/" "$PROJECT_DIR/README.md"
 
 echo ""
 echo "Updated to v${VERSION}. Next steps:"
@@ -40,11 +38,11 @@ echo "   - Check changed field names"
 echo ""
 echo "3. Update dialects if new ones added:"
 echo "   - src/lib.rs (Rust bindings)"
-echo "   - ts/src/dialects.ts (TypeScript)"
+echo "   - src/dialects.ts (TypeScript)"
 echo ""
 echo "4. Build and test:"
 echo "   ./scripts/build.sh"
-echo "   cd ts && npm test"
+echo "   npm test"
 echo ""
 echo "5. Commit and tag:"
 echo "   git add -A"

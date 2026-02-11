@@ -6,14 +6,13 @@ node_modules/
 
 # WASM build output
 /pkg
-/ts/wasm
+/wasm
 
 # TypeScript build output
-/ts/dist
+/dist
 
 # Test coverage
 /coverage
-/ts/coverage
 
 # npm pack output
 *.tgz

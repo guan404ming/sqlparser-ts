@@ -28,8 +28,7 @@ describe('Oracle - Operator Precedence', () => {
 });
 
 describe('Oracle - Quote Delimited Strings', () => {
-  // TODO: Enable when sqlparser >= 0.61.0 (PR #2130 merged Dec 16, 2025)
-  test.skip('parse_quote_delimited_string', () => {
+  test('parse_quote_delimited_string', () => {
     // Test various quote delimiters
     parseOne("SELECT Q'.abc.' FROM dual", oracle);
     parseOne("SELECT Q'Xab'cX' FROM dual", oracle);
@@ -45,8 +44,7 @@ describe('Oracle - Quote Delimited Strings', () => {
     parseOne("SELECT Q'[a[b]c]' FROM dual", oracle);
   });
 
-  // TODO: Enable when sqlparser >= 0.61.0 (PR #2130 merged Dec 16, 2025)
-  test.skip('parse_invalid_quote_delimited_strings', () => {
+  test('parse_invalid_quote_delimited_strings', () => {
     // Invalid delimiters should fail
     expectParseError("SELECT Q' abc ' FROM dual", oracle);
     expectParseError("SELECT Q'\tabc\t' FROM dual", oracle);
@@ -54,8 +52,7 @@ describe('Oracle - Quote Delimited Strings', () => {
     expectParseError("SELECT Q'", oracle);
   });
 
-  // TODO: Enable when sqlparser >= 0.61.0 (PR #2130 merged Dec 16, 2025)
-  test.skip('parse_quote_delimited_string_lowercase', () => {
+  test('parse_quote_delimited_string_lowercase', () => {
     // Lowercase q should work
     const sql = "select q'!a'b'c!d!' from dual";
     const stmt = parseOne(sql, oracle);
@@ -69,8 +66,7 @@ describe('Oracle - Quote Delimited Strings', () => {
 });
 
 describe('Oracle - National Quote Delimited Strings', () => {
-  // TODO: Enable when sqlparser >= 0.61.0 (PR #2130 merged Dec 16, 2025)
-  test.skip('parse_national_quote_delimited_string', () => {
+  test('parse_national_quote_delimited_string', () => {
     // Test NQ prefix for national character strings
     parseOne("SELECT NQ'.abc.' FROM dual", oracle);
     parseOne("SELECT NQ'Xab'cX' FROM dual", oracle);

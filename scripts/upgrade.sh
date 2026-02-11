@@ -24,7 +24,9 @@ sed -i '' "s/^version = \"[^\"]*\"/version = \"${VERSION}\"/" "$PROJECT_DIR/Carg
 sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" "$PROJECT_DIR/ts/package.json"
 
 # Update README badge
-sed -i '' "s/sqlparser--rs-v[0-9.]*-orange/sqlparser--rs-v${VERSION}-orange/" "$PROJECT_DIR/README.md"
+README=$(readlink -f "$PROJECT_DIR/README.md" 2>/dev/null || readlink "$PROJECT_DIR/README.md")
+[[ "$README" != /* ]] && README="$PROJECT_DIR/$README"
+sed -i '' "s/sqlparser--rs-v[0-9.]*-orange/sqlparser--rs-v${VERSION}-orange/" "$README"
 
 echo ""
 echo "Updated to v${VERSION}. Next steps:"

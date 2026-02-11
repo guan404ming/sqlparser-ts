@@ -313,8 +313,7 @@ describe('MSSQL - No Semicolon Delimiter', () => {
 });
 
 describe('MSSQL - BEGIN/END Blocks', () => {
-  test.skip('parse_begin_end', () => {
-    // BEGIN/END blocks not yet fully supported
+  test('parse_begin_end', () => {
     parseOne('BEGIN SELECT 1; END', mssql);
     parseOne('BEGIN SELECT 1; SELECT 2; END', mssql);
   });

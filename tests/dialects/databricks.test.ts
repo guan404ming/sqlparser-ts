@@ -12,7 +12,7 @@ import {
 const databricks = dialects.databricks;
 
 describe('Databricks - Identifiers and Strings', () => {
-  test('test_databricks_identifiers', () => {
+  test('parse_databricks_identifiers', () => {
     // Backtick-delimited identifiers
     parseOne('SELECT `Ä`', databricks);
     parseOne('SELECT `col name with spaces`', databricks);
@@ -25,7 +25,7 @@ describe('Databricks - Identifiers and Strings', () => {
 });
 
 describe('Databricks - EXISTS Function', () => {
-  test('test_databricks_exists', () => {
+  test('parse_databricks_exists', () => {
     // EXISTS as a function (not a keyword)
     parseOne('SELECT EXISTS(array(1, 2, 3), x -> x IS NULL)', databricks);
     parseOne('SELECT EXISTS(col, x -> x > 5) FROM my_table', databricks);
@@ -36,7 +36,7 @@ describe('Databricks - EXISTS Function', () => {
 });
 
 describe('Databricks - Lambda Functions', () => {
-  test('test_databricks_lambdas', () => {
+  test('parse_databricks_lambdas', () => {
     // Arrow syntax for lambda parameters
     parseOne('SELECT array_sort(array(5, 3, 1), (x, y) -> x - y)', databricks);
 
@@ -59,7 +59,7 @@ describe('Databricks - Lambda Functions', () => {
 });
 
 describe('Databricks - VALUES Clause', () => {
-  test('test_values_clause', () => {
+  test('parse_values_clause', () => {
     // VALUES clause for row constructors
     parseOne('VALUES ("one", 1), ("two", 2)', databricks);
     parseOne("VALUES ('a', 1), ('b', 2), ('c', 3)", databricks);
@@ -108,7 +108,7 @@ describe('Databricks - STRUCT Function', () => {
 });
 
 describe('Databricks - TIMESTAMP_NTZ', () => {
-  test('data_type_timestamp_ntz', () => {
+  test('parse_timestamp_ntz', () => {
     // TIMESTAMP_NTZ literal syntax
     parseOne("SELECT TIMESTAMP_NTZ '2025-03-29T18:52:00'", databricks);
     parseOne("SELECT TIMESTAMP_NTZ '2025-01-26 12:00:00'", databricks);

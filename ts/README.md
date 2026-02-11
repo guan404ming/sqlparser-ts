@@ -25,7 +25,10 @@ npm install @guanmingchiu/sqlparser-ts
 ## Usage
 
 ```typescript
-import { parse, format, validate } from '@guanmingchiu/sqlparser-ts';
+import { init, parse, format, validate } from '@guanmingchiu/sqlparser-ts';
+
+// Initialize WASM module (must be called once before using any parser functions)
+await init();
 
 // Parse SQL into AST
 const ast = parse('SELECT * FROM users');
@@ -39,6 +42,19 @@ const sql = format('select   *   from   users');
 
 // Validate SQL (throws on invalid)
 validate('SELECT * FROM users'); // ok
+```
+
+### Vite Configuration
+
+WASM packages must be excluded from Vite's dev server [dependency pre-bundling](https://github.com/vitejs/vite/discussions/9256). This only affects the dev server. Production builds use Rollup instead of esbuild and handle WASM files correctly.
+
+```typescript
+// vite.config.ts
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['@guanmingchiu/sqlparser-ts'],
+  },
+});
 ```
 
 ### Working with AST

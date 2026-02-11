@@ -60,22 +60,22 @@ describe('CJS build', () => {
   });
 
   test('parse works', async () => {
-    const { parse, ready } = require('../dist/index.cjs');
-    await ready();
+    const { parse, init } = require('../dist/index.cjs');
+    await init();
     const result = parse('SELECT 1');
     expect(Array.isArray(result)).toBe(true);
   });
 
   test('format works', async () => {
-    const { format, ready } = require('../dist/index.cjs');
-    await ready();
+    const { format, init } = require('../dist/index.cjs');
+    await init();
     const result = format('select 1');
     expect(result).toBe('SELECT 1');
   });
 
   test('dialect string works', async () => {
-    const { parse, ready } = require('../dist/index.cjs');
-    await ready();
+    const { parse, init } = require('../dist/index.cjs');
+    await init();
     const result = parse('SELECT $1', 'postgresql');
     expect(Array.isArray(result)).toBe(true);
   });

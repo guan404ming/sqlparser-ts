@@ -4,7 +4,7 @@ import { ParserError } from './types/errors.js';
 import type { Statement } from './types/ast.js';
 import { getWasmModule } from './wasm.js';
 
-export { initWasm, ready } from './wasm.js';
+export { init } from './wasm.js';
 
 /** Dialect can be specified as a Dialect instance or a string name */
 export type DialectInput = Dialect | DialectName;

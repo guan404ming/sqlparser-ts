@@ -1,4 +1,4 @@
-import { initWasm } from '../src';
+import { init } from '../src';
 
 // Initialize WASM before running tests
-await initWasm();
+await init();

@@ -7,16 +7,18 @@ on:
       - 'v*'
     paths:
       - 'src/**'
-      - 'ts/**'
+      - 'tests/**'
       - 'Cargo.*'
+      - 'package*.json'
       - '.github/workflows/ci.yml'
       - '.githooks/**'
   pull_request:
     branches: [main]
     paths:
       - 'src/**'
-      - 'ts/**'
+      - 'tests/**'
       - 'Cargo.*'
+      - 'package*.json'
       - '.github/workflows/ci.yml'
       - '.githooks/**'
 
@@ -40,10 +42,8 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: ts/package-lock.json
 
       - name: Install npm dependencies
-        working-directory: ts
         run: npm ci
 
       - name: Run pre-commit checks
@@ -53,14 +53,12 @@ jobs:
         uses: jetli/wasm-pack-action@v0.4.0
 
       - name: Build WASM
-        run: wasm-pack build --target web --out-dir ts/wasm
+        run: wasm-pack build --target web --out-dir wasm
 
       - name: Build TypeScript
-        working-directory: ts
         run: npm run build:ts
 
       - name: Run tests
-        working-directory: ts
         run: npm test
 
       - name: Upload build artifacts
@@ -69,11 +67,11 @@ jobs:
         with:
           name: build-artifacts
           path: |
-            ts/wasm/
-            ts/dist/
-            ts/package.json
-            ts/package-lock.json
-            ts/README.md
+            wasm/
+            dist/
+            package.json
+            package-lock.json
+            README.md
           retention-days: 1
 
   publish:
@@ -89,7 +87,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: ts
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -98,7 +95,6 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
 
       - name: Publish to npm
-        working-directory: ts
         run: |
           VERSION="${GITHUB_REF#refs/tags/v}"
           if [[ "$VERSION" == *"rc"* ]]; then

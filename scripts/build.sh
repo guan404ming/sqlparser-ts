@@ -22,11 +22,10 @@ fi
 
 echo "Step 1: Building WASM module..."
 cd "$PROJECT_DIR"
-wasm-pack build --target web --out-dir ts/wasm
+wasm-pack build --target web --out-dir wasm
 
 echo ""
 echo "Step 2: Installing npm dependencies..."
-cd "$PROJECT_DIR/ts"
 npm install
 
 echo ""
@@ -39,10 +38,10 @@ echo "Build complete!"
 echo "=========================================="
 echo ""
 echo "Output files:"
-echo "  - WASM:  ts/wasm/"
-echo "  - ESM:   ts/dist/index.mjs"
-echo "  - CJS:   ts/dist/index.cjs"
-echo "  - Types: ts/dist/index.d.{mts,cts}"
+echo "  - WASM:  wasm/"
+echo "  - ESM:   dist/index.mjs"
+echo "  - CJS:   dist/index.cjs"
+echo "  - Types: dist/index.d.{mts,cts}"
 echo ""
-echo "To run tests: cd ts && npm test"
-echo "To publish: cd ts && npm publish"
+echo "To run tests: npm test"
+echo "To publish: npm publish"

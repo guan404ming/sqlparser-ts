@@ -6,7 +6,7 @@ cargo fmt --check || {
     exit 1
 }
 
-# Lint TypeScript (if ts/node_modules exists)
-if [ -d "ts/node_modules" ]; then
-    cd ts && npm run lint || exit 1
+# Lint TypeScript (if node_modules exists)
+if [ -d "node_modules" ]; then
+    npm run lint || exit 1
 fi

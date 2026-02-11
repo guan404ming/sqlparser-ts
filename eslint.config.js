@@ -3,7 +3,7 @@ import unusedImports from 'eslint-plugin-unused-imports';
 
 export default tseslint.config(
   {
-    ignores: ['dist/**', 'wasm/**', 'coverage/**'],
+    ignores: ['dist/**', 'wasm/**', 'coverage/**', '**/*.rs'],
   },
   ...tseslint.configs.recommended,
   {

@@ -1,5 +1,5 @@
 {
-  "name": "@guanmingchiu/sqlparser-ts",
+  "name": "sqlparser-ts",
   "version": "0.61.1",
   "type": "module",
   "description": "A SQL parser for JavaScript and TypeScript, powered by datafusion-sqlparser-rs via WASM",

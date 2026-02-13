@@ -35,7 +35,7 @@ export interface ParserOptions {
  *
  * @example
  * ```typescript
- * import { Parser, PostgreSqlDialect } from '@guanmingchiu/sqlparser-ts';
+ * import { Parser, PostgreSqlDialect } from 'sqlparser-ts';
  *
  * const statements = Parser.parse('SELECT * FROM users', 'postgresql');
  *

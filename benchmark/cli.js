@@ -2,7 +2,7 @@
 import { performance } from 'perf_hooks';
 import { writeFileSync, readFileSync, mkdirSync, existsSync, readdirSync, statSync } from 'fs';
 import { join, resolve } from 'path';
-import { queries, dialectQueries, getQueriesForDialect, dialects } from './queries.js';
+import { getQueriesForDialect, dialects } from './queries.js';
 
 // ============================================================
 // PARSERS
@@ -12,7 +12,7 @@ let sqlparserRs = null;
 let nodeSqlParser = null;
 
 async function initParsers() {
-  const rs = await import('@guanmingchiu/sqlparser-ts');
+  const rs = await import('sqlparser-ts');
   await rs.ready();
   sqlparserRs = rs;
 
@@ -224,7 +224,7 @@ Parsing success rate across ${numQueries} test queries per dialect:
 // ============================================================
 
 async function runBenchmark(options = {}) {
-  const { iterations = 10000, dialect = 'all', method = 'all' } = options;
+  const { iterations = 10000, dialect = 'all' } = options;
 
   console.log('='.repeat(70));
   console.log('SQL Parser Benchmark: sqlparser-ts vs node-sql-parser');
@@ -542,8 +542,6 @@ async function runBench(options = {}) {
   });
 
   // 2. Combined: Time by Command and Dialect (per-call comparison)
-  const dialectLabels = dialects.map(d => d.charAt(0).toUpperCase() + d.slice(1));
-  const methodLabels = comparableMethods.map(m => m.charAt(0).toUpperCase() + m.slice(1));
 
   // Calculate per-call timing
   const numQueries = benchResults.results.mysql.queries.total;

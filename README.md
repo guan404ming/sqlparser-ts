@@ -1,7 +1,7 @@
 # sqlparser-ts
 
-[![npm version](https://img.shields.io/npm/v/@guanmingchiu/sqlparser-ts.svg)](https://www.npmjs.com/package/@guanmingchiu/sqlparser-ts)
-[![npm downloads](https://img.shields.io/npm/dm/@guanmingchiu/sqlparser-ts.svg)](https://www.npmjs.com/package/@guanmingchiu/sqlparser-ts)
+[![npm version](https://img.shields.io/npm/v/sqlparser-ts.svg)](https://www.npmjs.com/package/sqlparser-ts)
+[![npm downloads](https://img.shields.io/npm/dm/sqlparser-ts.svg)](https://www.npmjs.com/package/sqlparser-ts)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![WebAssembly](https://img.shields.io/badge/WebAssembly-powered-blueviolet.svg)](https://webassembly.org/)
 [![sqlparser](https://img.shields.io/badge/sqlparser--rs-v0.61.0-orange.svg)](https://github.com/apache/datafusion-sqlparser-rs)
@@ -19,13 +19,13 @@ SQL parser for JavaScript and TypeScript, powered by [datafusion-sqlparser-rs](h
 ## Installation
 
 ```bash
-npm install @guanmingchiu/sqlparser-ts
+npm install sqlparser-ts
 ```
 
 ## Usage
 
 ```typescript
-import { init, parse, format, validate } from '@guanmingchiu/sqlparser-ts';
+import { init, parse, format, validate } from 'sqlparser-ts';
 
 // Initialize WASM module (must be called once before using any parser functions)
 await init();
@@ -52,7 +52,7 @@ WASM packages must be excluded from Vite's dev server [dependency pre-bundling](
 // vite.config.ts
 export default defineConfig({
   optimizeDeps: {
-    exclude: ['@guanmingchiu/sqlparser-ts'],
+    exclude: ['sqlparser-ts'],
   },
 });
 ```

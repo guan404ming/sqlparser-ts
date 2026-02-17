@@ -8,6 +8,11 @@
 
 SQL parser for JavaScript and TypeScript, powered by [datafusion-sqlparser-rs](https://github.com/apache/datafusion-sqlparser-rs) via WebAssembly.
 
+## News
+
+- [2026/02] sqlparser-ts has been officially integrated into [Apache Airflow](https://github.com/apache/airflow)
+- [2026/01] Officially released sqlparser-ts 🎉
+
 ## Features
 
 - Parse SQL into a detailed AST with full TypeScript types

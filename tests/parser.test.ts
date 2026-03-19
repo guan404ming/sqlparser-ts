@@ -15,6 +15,7 @@ import {
   isUpdate,
   isDelete,
 } from './test-utils';
+import { Parser, parseWithComments } from '../src';
 
 describe('Parser', () => {
   describe('basic parsing', () => {
@@ -186,6 +187,64 @@ describe('Comments', () => {
   test('parses nested comments in some dialects', () => {
     // PostgreSQL and some other dialects support nested comments
     parseOne('SELECT /* outer /* inner */ outer */ 1', dialects.postgresql);
+  });
+});
+
+describe('parseWithComments', () => {
+  test('returns statements and comments', () => {
+    const result = Parser.parseWithComments('SELECT 1 -- a comment');
+    expect(result.statements).toHaveLength(1);
+    expect(result.comments).toHaveLength(1);
+  });
+
+  test('extracts single-line comment fields', () => {
+    const result = Parser.parseWithComments('SELECT 1 -- hello');
+    const c = result.comments[0];
+    expect(c.commentType).toBe('singleLine');
+    expect(c.content).toContain('hello');
+    expect(c.prefix).toBe('--');
+  });
+
+  test('extracts multi-line comment fields', () => {
+    const result = Parser.parseWithComments('SELECT /* block */ 1');
+    const c = result.comments[0];
+    expect(c.commentType).toBe('multiLine');
+    expect(c.content).toContain('block');
+    expect(c.prefix).toBeUndefined();
+  });
+
+  test('span fields report correct positions', () => {
+    // "-- span test" starts at column 10 on line 1
+    const result = Parser.parseWithComments('SELECT 1 -- span test');
+    const c = result.comments[0];
+    expect(c.startLine).toBe(1);
+    expect(c.startColumn).toBe(10);
+    expect(c.endLine).toBe(1);
+    expect(c.endColumn).toBe(22);
+  });
+
+  test('extracts multiple comments', () => {
+    const sql = '-- first\nSELECT /* second */ 1 -- third';
+    const result = Parser.parseWithComments(sql);
+    expect(result.comments.length).toBeGreaterThanOrEqual(3);
+  });
+
+  test('returns empty comments array when none present', () => {
+    const result = Parser.parseWithComments('SELECT 1');
+    expect(result.statements).toHaveLength(1);
+    expect(result.comments).toHaveLength(0);
+  });
+
+  test('accepts dialect argument', () => {
+    const result = Parser.parseWithComments('SELECT $1 -- param', 'postgresql');
+    expect(result.statements).toHaveLength(1);
+    expect(result.comments).toHaveLength(1);
+  });
+
+  test('convenience function works', () => {
+    const result = parseWithComments('SELECT 1 -- test');
+    expect(result.statements).toHaveLength(1);
+    expect(result.comments).toHaveLength(1);
   });
 });
 

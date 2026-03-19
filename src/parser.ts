@@ -2,6 +2,7 @@ import type { Dialect, DialectName } from './dialects.js';
 import { dialectFromString, GenericDialect } from './dialects.js';
 import { ParserError } from './types/errors.js';
 import type { Statement } from './types/ast.js';
+import type { ParseWithCommentsResult } from './types/comments.js';
 import { getWasmModule } from './wasm.js';
 
 export { init } from './wasm.js';
@@ -87,6 +88,16 @@ export class Parser {
     return new Parser(resolveDialect(dialect)).parse(sql);
   }
 
+  /** Parse SQL and return both AST and source comments */
+  static parseWithComments(sql: string, dialect: DialectInput = 'generic'): ParseWithCommentsResult<Statement> {
+    const wasm = getWasmModule();
+    try {
+      return wasm.parse_sql_with_comments(resolveDialect(dialect).name, sql) as ParseWithCommentsResult<Statement>;
+    } catch (error) {
+      throw ParserError.fromWasmError(error);
+    }
+  }
+
   /** Parse SQL and return AST as JSON string */
   static parseToJson(sql: string, dialect: DialectInput = 'generic'): string {
     const wasm = getWasmModule();
@@ -143,6 +154,13 @@ export class Parser {
  */
 export function parse(sql: string, dialect: DialectInput = 'generic'): Statement[] {
   return Parser.parse(sql, dialect);
+}
+
+/**
+ * Parse SQL and return both AST and source comments
+ */
+export function parseWithComments(sql: string, dialect: DialectInput = 'generic'): ParseWithCommentsResult<Statement> {
+  return Parser.parseWithComments(sql, dialect);
 }
 
 /**

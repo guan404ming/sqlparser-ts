@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use sqlparser::ast::comments::{Comment as SqlComment, CommentWithSpan};
 use sqlparser::dialect::{
     AnsiDialect, BigQueryDialect, ClickHouseDialect, DatabricksDialect, Dialect, DuckDbDialect,
     GenericDialect, HiveDialect, MsSqlDialect, MySqlDialect, OracleDialect, PostgreSqlDialect,
@@ -161,6 +162,73 @@ pub fn get_supported_dialects() -> JsValue {
     ];
 
     serde_wasm_bindgen::to_value(&dialects).unwrap()
+}
+
+/// A serializable source comment
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SerializedComment {
+    pub comment_type: String,
+    pub content: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prefix: Option<String>,
+    pub start_line: u64,
+    pub start_column: u64,
+    pub end_line: u64,
+    pub end_column: u64,
+}
+
+impl From<&CommentWithSpan> for SerializedComment {
+    fn from(c: &CommentWithSpan) -> Self {
+        let (comment_type, content, prefix) = match &c.comment {
+            SqlComment::SingleLine { content, prefix } => (
+                "singleLine".to_string(),
+                content.clone(),
+                Some(prefix.clone()),
+            ),
+            SqlComment::MultiLine(content) => ("multiLine".to_string(), content.clone(), None),
+        };
+        SerializedComment {
+            comment_type,
+            content,
+            prefix,
+            start_line: c.span.start.line,
+            start_column: c.span.start.column,
+            end_line: c.span.end.line,
+            end_column: c.span.end.column,
+        }
+    }
+}
+
+/// Parse SQL and return both AST and source comments
+#[wasm_bindgen]
+pub fn parse_sql_with_comments(dialect: &str, sql: &str) -> Result<JsValue, JsValue> {
+    let dialect_impl = get_dialect(dialect);
+    let (statements, comments) = Parser::parse_sql_with_comments(dialect_impl.as_ref(), sql)
+        .map_err(|e| {
+            let error = ParseError {
+                message: e.to_string(),
+                line: None,
+                column: None,
+            };
+            serde_wasm_bindgen::to_value(&error).unwrap_or(JsValue::from_str(&e.to_string()))
+        })?;
+
+    let comments_vec: Vec<CommentWithSpan> = comments.into();
+    let serialized_comments: Vec<SerializedComment> =
+        comments_vec.iter().map(SerializedComment::from).collect();
+
+    #[derive(Serialize)]
+    struct Result {
+        statements: Vec<sqlparser::ast::Statement>,
+        comments: Vec<SerializedComment>,
+    }
+
+    serde_wasm_bindgen::to_value(&Result {
+        statements,
+        comments: serialized_comments,
+    })
+    .map_err(|e| JsValue::from_str(&format!("Serialization error: {}", e)))
 }
 
 /// Validate SQL syntax without returning the full AST

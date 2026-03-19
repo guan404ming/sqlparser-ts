@@ -82,7 +82,7 @@ pub fn parse_sql_with_options(
     // Note: trailing_commas option support depends on sqlparser version
 
     let tokens = sqlparser::tokenizer::Tokenizer::new(dialect_impl.as_ref(), sql)
-        .tokenize()
+        .tokenize_with_location()
         .map_err(|e| {
             let error = ParseError {
                 message: e.to_string(),
@@ -92,7 +92,7 @@ pub fn parse_sql_with_options(
             serde_wasm_bindgen::to_value(&error).unwrap_or(JsValue::from_str(&e.to_string()))
         })?;
 
-    parser = parser.with_tokens(tokens);
+    parser = parser.with_tokens_with_locations(tokens);
 
     let statements = parser.parse_statements().map_err(|e| {
         let error = ParseError {

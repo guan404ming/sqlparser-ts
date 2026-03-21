@@ -4,6 +4,7 @@ import { WasmInitError } from './types/errors.js';
 export interface WasmModule {
   parse_sql: (dialect: string, sql: string) => unknown;
   parse_sql_with_options: (dialect: string, sql: string, options: unknown) => unknown;
+  parse_sql_with_comments: (dialect: string, sql: string) => unknown;
   parse_sql_to_json_string: (dialect: string, sql: string) => string;
   parse_sql_to_string: (dialect: string, sql: string) => string;
   format_sql: (dialect: string, sql: string) => string;

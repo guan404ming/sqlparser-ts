@@ -16,6 +16,7 @@ describe('ESM build', () => {
     const esm = await import('../dist/index.mjs');
 
     expect(typeof esm.parse).toBe('function');
+    expect(typeof esm.parseWithComments).toBe('function');
     expect(typeof esm.format).toBe('function');
     expect(typeof esm.validate).toBe('function');
     expect(typeof esm.Parser).toBe('function');
@@ -53,6 +54,7 @@ describe('CJS build', () => {
     const cjs = require('../dist/index.cjs');
 
     expect(typeof cjs.parse).toBe('function');
+    expect(typeof cjs.parseWithComments).toBe('function');
     expect(typeof cjs.format).toBe('function');
     expect(typeof cjs.validate).toBe('function');
     expect(typeof cjs.Parser).toBe('function');

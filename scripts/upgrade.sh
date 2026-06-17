@@ -16,15 +16,16 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 echo "Upgrading to sqlparser v${VERSION}..."
 
+# perl -i is portable across macOS (BSD) and CI (GNU); sed -i differs
 # Update Cargo.toml
-sed -i '' "s/sqlparser = { version = \"[^\"]*\"/sqlparser = { version = \"${VERSION}\"/" "$PROJECT_DIR/Cargo.toml"
-sed -i '' "s/^version = \"[^\"]*\"/version = \"${VERSION}\"/" "$PROJECT_DIR/Cargo.toml"
+perl -i -pe "s/sqlparser = \{ version = \"[^\"]*\"/sqlparser = { version = \"${VERSION}\"/" "$PROJECT_DIR/Cargo.toml"
+perl -i -pe "s/^version = \"[^\"]*\"/version = \"${VERSION}\"/" "$PROJECT_DIR/Cargo.toml"
 
 # Update package.json
-sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" "$PROJECT_DIR/package.json"
+perl -i -pe "s/\"version\": \"[^\"]*\"/\"version\": \"${VERSION}\"/" "$PROJECT_DIR/package.json"
 
 # Update README badge
-sed -i '' "s/sqlparser--rs-v[0-9.]*-orange/sqlparser--rs-v${VERSION}-orange/" "$PROJECT_DIR/README.md"
+perl -i -pe "s/sqlparser--rs-v[0-9.]*-orange/sqlparser--rs-v${VERSION}-orange/" "$PROJECT_DIR/README.md"
 
 echo ""
 echo "Updated to v${VERSION}. Next steps:"

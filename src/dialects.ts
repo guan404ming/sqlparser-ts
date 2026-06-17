@@ -112,6 +112,20 @@ export class OracleDialect implements Dialect {
 }
 
 /**
+ * Apache Spark SQL dialect
+ */
+export class SparkDialect implements Dialect {
+  readonly name = 'spark';
+}
+
+/**
+ * Teradata dialect
+ */
+export class TeradataDialect implements Dialect {
+  readonly name = 'teradata';
+}
+
+/**
  * All supported dialect names
  */
 export const SUPPORTED_DIALECTS = [
@@ -129,6 +143,8 @@ export const SUPPORTED_DIALECTS = [
   'databricks',
   'hive',
   'oracle',
+  'spark',
+  'teradata',
 ] as const;
 
 export type DialectName = (typeof SUPPORTED_DIALECTS)[number];
@@ -151,6 +167,8 @@ const DIALECT_MAP: Record<DialectName, new () => Dialect> = {
   databricks: DatabricksDialect,
   hive: HiveDialect,
   oracle: OracleDialect,
+  spark: SparkDialect,
+  teradata: TeradataDialect,
 };
 
 /** Create a dialect instance from a string name (case-insensitive) */
@@ -163,6 +181,7 @@ export function dialectFromString(name: string): Dialect | undefined {
     pg: 'postgresql',
     sqlserver: 'mssql',
     duck: 'duckdb',
+    sparksql: 'spark',
   };
 
   const dialectName = aliasMap[normalized] ?? normalized;

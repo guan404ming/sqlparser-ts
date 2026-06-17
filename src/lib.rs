@@ -3,7 +3,7 @@ use sqlparser::ast::comments::{Comment as SqlComment, CommentWithSpan};
 use sqlparser::dialect::{
     AnsiDialect, BigQueryDialect, ClickHouseDialect, DatabricksDialect, Dialect, DuckDbDialect,
     GenericDialect, HiveDialect, MsSqlDialect, MySqlDialect, OracleDialect, PostgreSqlDialect,
-    RedshiftSqlDialect, SQLiteDialect, SnowflakeDialect,
+    RedshiftSqlDialect, SQLiteDialect, SnowflakeDialect, SparkSqlDialect, TeradataDialect,
 };
 use sqlparser::parser::Parser;
 use wasm_bindgen::prelude::*;
@@ -48,6 +48,8 @@ fn get_dialect(dialect_name: &str) -> Box<dyn Dialect> {
         "databricks" => Box::new(DatabricksDialect {}),
         "hive" => Box::new(HiveDialect {}),
         "oracle" => Box::new(OracleDialect {}),
+        "spark" | "sparksql" => Box::new(SparkSqlDialect {}),
+        "teradata" => Box::new(TeradataDialect {}),
         _ => Box::new(GenericDialect {}),
     }
 }

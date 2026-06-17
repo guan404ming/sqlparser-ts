@@ -19,6 +19,8 @@ import {
   AnsiDialect,
   OracleDialect,
   DatabricksDialect,
+  SparkDialect,
+  TeradataDialect,
   type Dialect,
   type Statement,
 } from '../src';
@@ -103,6 +105,8 @@ export const dialects = {
   hive: new HiveDialect(),
   oracle: new OracleDialect(),
   databricks: new DatabricksDialect(),
+  spark: new SparkDialect(),
+  teradata: new TeradataDialect(),
 };
 
 /**

@@ -70,7 +70,7 @@ jobs:
 
       - name: Create pull request
         if: steps.ver.outputs.needs == 'true'
-        uses: peter-evans/create-pull-request@v6
+        uses: peter-evans/create-pull-request@v7
         with:
           branch: upgrade/sqlparser-${{ steps.ver.outputs.latest }}
           title: '⬆️ Upgrade to sqlparser v${{ steps.ver.outputs.latest }}'

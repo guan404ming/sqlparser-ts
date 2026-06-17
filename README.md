@@ -16,7 +16,7 @@ SQL parser for JavaScript and TypeScript, powered by [datafusion-sqlparser-rs](h
 ## Features
 
 - Parse SQL into a detailed AST with full TypeScript types
-- Support 14 SQL dialects (PostgreSQL, MySQL, SQLite, BigQuery, and more)
+- Support 16 SQL dialects (PostgreSQL, MySQL, SQLite, BigQuery, and more)
 - Run in Node.js and browsers
 - Stay small (~600KB gzipped) and fast (Rust + WebAssembly)
 - Ship zero native dependencies
@@ -94,7 +94,7 @@ try {
 
 ## Supported Dialects
 
-`generic`, `ansi`, `mysql`, `postgresql`, `sqlite`, `snowflake`, `redshift`, `mssql`, `clickhouse`, `bigquery`, `duckdb`, `databricks`, `hive`, `oracle`
+`generic`, `ansi`, `mysql`, `postgresql`, `sqlite`, `snowflake`, `redshift`, `mssql`, `clickhouse`, `bigquery`, `duckdb`, `databricks`, `hive`, `oracle`, `spark`, `teradata`
 
 ## Versioning
 

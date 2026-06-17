@@ -23,6 +23,8 @@ export {
   DatabricksDialect,
   HiveDialect,
   OracleDialect,
+  SparkDialect,
+  TeradataDialect,
   dialectFromString,
   SUPPORTED_DIALECTS,
 } from './dialects.js';

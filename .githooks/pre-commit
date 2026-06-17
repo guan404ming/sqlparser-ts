@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# GUI git clients often lack ~/.cargo/bin in PATH
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
+
 # Format Rust code
 cargo fmt --check || {
     echo "Run 'cargo fmt' to fix formatting"

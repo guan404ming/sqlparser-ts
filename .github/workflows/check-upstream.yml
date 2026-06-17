@@ -38,7 +38,7 @@ jobs:
           CURRENT=$(grep 'sqlparser = { version' Cargo.toml | grep -oP '"\K[0-9.]+')
           LATEST="${{ github.event.inputs.version }}"
           if [ -z "$LATEST" ]; then
-            LATEST=$(cargo search sqlparser --limit 1 | grep -oP '^sqlparser = "\K[^"]+')
+            LATEST=$(CARGO_TERM_COLOR=never cargo search sqlparser --limit 1 | grep -oP '^sqlparser = "\K[^"]+')
           fi
           echo "current=$CURRENT" >> $GITHUB_OUTPUT
           echo "latest=$LATEST" >> $GITHUB_OUTPUT

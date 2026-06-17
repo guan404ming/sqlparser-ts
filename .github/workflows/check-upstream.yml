@@ -1,94 +1,92 @@
-name: Check Upstream Updates
+name: Upstream Upgrade
 
 on:
   schedule:
     - cron: '0 9 * * *'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'sqlparser version (blank = latest)'
+        required: false
 
 permissions:
-  issues: write
+  contents: write
+  pull-requests: write
 
 jobs:
-  check:
+  upgrade:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Get current version
-        id: current
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Resolve versions
+        id: ver
         run: |
           CURRENT=$(grep 'sqlparser = { version' Cargo.toml | grep -oP '"\K[0-9.]+')
-          echo "version=$CURRENT" >> $GITHUB_OUTPUT
-          echo "Current version: $CURRENT"
-
-      - name: Get latest upstream version
-        id: latest
-        run: |
-          LATEST=$(cargo search sqlparser --limit 1 | grep -oP 'sqlparser = "\K[^"]+')
-          echo "version=$LATEST" >> $GITHUB_OUTPUT
-          echo "Latest version: $LATEST"
-
-      - name: Compare versions
-        id: compare
-        run: |
-          if [ "${{ steps.current.outputs.version }}" != "${{ steps.latest.outputs.version }}" ]; then
-            echo "needs_update=true" >> $GITHUB_OUTPUT
-            echo "🆕 New version available!"
-          else
-            echo "needs_update=false" >> $GITHUB_OUTPUT
-            echo "✅ Already up to date"
+          LATEST="${{ github.event.inputs.version }}"
+          if [ -z "$LATEST" ]; then
+            LATEST=$(cargo search sqlparser --limit 1 | grep -oP '^sqlparser = "\K[^"]+')
           fi
+          echo "current=$CURRENT" >> $GITHUB_OUTPUT
+          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+          [ "$CURRENT" = "$LATEST" ] && echo "needs=false" >> $GITHUB_OUTPUT || echo "needs=true" >> $GITHUB_OUTPUT
+          echo "Current: $CURRENT, Latest: $LATEST"
 
-      - name: Create issue for update
-        if: steps.compare.outputs.needs_update == 'true'
-        uses: actions/github-script@v7
+      - name: Apply upgrade
+        if: steps.ver.outputs.needs == 'true'
+        run: |
+          ./scripts/upgrade.sh ${{ steps.ver.outputs.latest }}
+          cargo update -p sqlparser --precise ${{ steps.ver.outputs.latest }}
+
+      - name: Install npm dependencies
+        if: steps.ver.outputs.needs == 'true'
+        run: npm ci
+
+      - name: Install wasm-pack
+        if: steps.ver.outputs.needs == 'true'
+        uses: jetli/wasm-pack-action@v0.4.0
+
+      - name: Build and test
+        id: verify
+        if: steps.ver.outputs.needs == 'true'
+        continue-on-error: true
+        run: |
+          wasm-pack build --target web --out-dir wasm
+          npm run build:ts
+          npm test
+
+      - name: Create pull request
+        if: steps.ver.outputs.needs == 'true'
+        uses: peter-evans/create-pull-request@v6
         with:
-          script: |
-            const current = '${{ steps.current.outputs.version }}';
-            const latest = '${{ steps.latest.outputs.version }}';
+          branch: upgrade/sqlparser-${{ steps.ver.outputs.latest }}
+          title: '⬆️ Upgrade to sqlparser v${{ steps.ver.outputs.latest }}'
+          commit-message: 'chore: upgrade to sqlparser v${{ steps.ver.outputs.latest }}'
+          labels: upstream-update
+          draft: ${{ steps.verify.outcome != 'success' }}
+          body: |
+            Automated upgrade `${{ steps.ver.outputs.current }}` → `${{ steps.ver.outputs.latest }}`.
 
-            // Check if issue already exists
-            const issues = await github.rest.issues.listForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              labels: 'upstream-update'
-            });
+            Build and test: **${{ steps.verify.outcome }}** (opened as draft if not success).
 
-            const existingIssue = issues.data.find(i => i.title.includes(latest));
-            if (existingIssue) {
-              console.log('Issue already exists:', existingIssue.html_url);
-              return;
-            }
+            Changelog: https://github.com/apache/datafusion-sqlparser-rs/releases/tag/v${{ steps.ver.outputs.latest }}
 
-            // Create new issue
-            const issue = await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: `⬆️ Upgrade to sqlparser v${latest}`,
-              labels: ['upstream-update'],
-              body: `## New upstream version available
+            ## Review checklist
+            - [ ] New dialects in `src/lib.rs` + `src/dialects.ts`
+            - [ ] AST changes mirrored in `src/types/ast.ts`
+            - [ ] README updated if needed
 
-            | | Version |
-            |---|---|
-            | Current | \`${current}\` |
-            | Latest | \`${latest}\` |
-
-            ## Changelog
-
-            https://github.com/apache/datafusion-sqlparser-rs/releases/tag/v${latest}
-
-            ## Checklist
-
-            - [ ] Run \`./scripts/upgrade.sh ${latest}\`
-            - [ ] Check for new dialects
-            - [ ] Check for AST changes
-            - [ ] Update \`src/types/ast.ts\` if needed
-            - [ ] Run \`./scripts/build.sh\`
-            - [ ] Run tests: \`npm test\`
-            - [ ] Update README if needed
-            - [ ] Publish to npm
-            `
-            });
-
-            console.log('Created issue:', issue.data.html_url);
+            After merge, tag `v${{ steps.ver.outputs.latest }}` to publish.

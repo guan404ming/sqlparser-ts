@@ -1,7 +1,7 @@
 # sqlparser-ts
 
 [![npm version](https://img.shields.io/npm/v/@guanmingchiu/sqlparser-ts.svg)](https://www.npmjs.com/package/@guanmingchiu/sqlparser-ts)
-[![npm downloads](https://img.shields.io/npm/dm/@guanmingchiu/sqlparser-ts.svg)](https://www.npmjs.com/package/@guanmingchiu/sqlparser-ts)
+[![npm downloads](https://badgen.net/npm/dm/@guanmingchiu/sqlparser-ts)](https://www.npmjs.com/package/@guanmingchiu/sqlparser-ts)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![WebAssembly](https://img.shields.io/badge/WebAssembly-powered-blueviolet.svg)](https://webassembly.org/)
 [![sqlparser](https://img.shields.io/badge/sqlparser--rs-v0.62.0-orange.svg)](https://github.com/apache/datafusion-sqlparser-rs)

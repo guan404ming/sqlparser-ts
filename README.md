@@ -103,7 +103,7 @@ Follows [Semantic Versioning](https://semver.org/) with upstream tracking:
 - MAJOR.MINOR: Tracks upstream [datafusion-sqlparser-rs](https://github.com/apache/datafusion-sqlparser-rs)
 - PATCH: sqlparser-ts specific releases
 
-Example: `0.60.4` = upstream 0.60 + 4 sqlparser-ts releases
+Example: `0.62.0` = upstream 0.62 + 0 sqlparser-ts releases
 
 ## License
 

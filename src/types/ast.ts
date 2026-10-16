@@ -99,9 +99,9 @@ export type Expr =
   | { InList: { expr: Expr; list: Expr[]; negated: boolean } }
   | { InSubquery: { expr: Expr; subquery: Query; negated: boolean } }
   | { Between: { expr: Expr; negated: boolean; low: Expr; high: Expr } }
-  | { Like: { expr: Expr; negated: boolean; pattern: Expr; escapeChar?: string } }
-  | { ILike: { expr: Expr; negated: boolean; pattern: Expr; escapeChar?: string } }
-  | { SimilarTo: { expr: Expr; negated: boolean; pattern: Expr; escapeChar?: string } }
+  | { Like: { expr: Expr; negated: boolean; pattern: Expr; escapeChar?: Expr } }
+  | { ILike: { expr: Expr; negated: boolean; pattern: Expr; escapeChar?: Expr } }
+  | { SimilarTo: { expr: Expr; negated: boolean; pattern: Expr; escapeChar?: Expr } }
   | { Case: { operand?: Expr; conditions: Expr[]; results: Expr[]; elseResult?: Expr } }
   | { Cast: { expr: Expr; dataType: DataType } }
   | { TryCast: { expr: Expr; dataType: DataType } }
@@ -403,7 +403,7 @@ export interface SelectInto {
   temporary: boolean;
   unlogged: boolean;
   table: boolean;
-  name: ObjectName;
+  targets: Expr[];
 }
 
 export interface LateralView {

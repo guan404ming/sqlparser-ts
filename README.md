@@ -62,6 +62,18 @@ export default defineConfig({
 });
 ```
 
+### Cloudflare Workers
+
+A Worker can't compile WASM from bytes or read files, so `init()` can't load the parser there. Import the WASM as a module of the Worker and hand it to the bindings:
+
+```typescript
+import { initSync, parse_sql } from '@guanmingchiu/sqlparser-ts/wasm/sqlparser_rs_wasm.js';
+import module from '@guanmingchiu/sqlparser-ts/wasm/sqlparser_rs_wasm_bg.wasm';
+
+initSync({ module });
+parse_sql('sqlite', 'SELECT * FROM users');
+```
+
 ### Working with AST
 
 ```typescript

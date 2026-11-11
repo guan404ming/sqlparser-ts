@@ -11,7 +11,8 @@
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./wasm/*": "./wasm/*"
   },
   "files": [
     "dist",

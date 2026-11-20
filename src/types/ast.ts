@@ -96,8 +96,7 @@ export type Expr =
   | { IsNotTrue: Expr }
   | { IsNotFalse: Expr }
   | { IsNotUnknown: Expr }
-  | { InList: { expr: Expr; list: Expr[]; negated: boolean } }
-  | { InSubquery: { expr: Expr; subquery: Query; negated: boolean } }
+  | { In: { expr: Expr; target: InTarget; negated: boolean; global: boolean } }
   | { Between: { expr: Expr; negated: boolean; low: Expr; high: Expr } }
   | { Like: { expr: Expr; negated: boolean; pattern: Expr; escapeChar?: Expr } }
   | { ILike: { expr: Expr; negated: boolean; pattern: Expr; escapeChar?: Expr } }
@@ -123,6 +122,12 @@ export type Expr =
   | { AtTimeZone: { timestamp: Expr; timeZone: string } }
   | { Interval: IntervalExpr }
   | 'Wildcard';
+
+export type InTarget =
+  | { List: Expr[] }
+  | { Subquery: Query }
+  | { Unnest: Expr }
+  | { Table: { name: ObjectName; args?: FunctionArg[] } };
 
 /**
  * Function expression
@@ -222,9 +227,11 @@ export type DataType =
   | 'Json'
   | 'Jsonb'
   | { Array: DataType }
-  | { Custom: [ObjectName, string[]] }
+  | { Custom: [ObjectName, TypeModifier[]] }
   | 'Regclass'
   | 'String';
+
+export type TypeModifier = { Identifier: Ident } | { Number: [string, boolean] } | { String: string };
 
 // =============================================================================
 // Query Components
@@ -723,7 +730,7 @@ export type Statement =
         target: CopyTarget;
         options: CopyOption[];
         legacyOptions: CopyLegacyOption[];
-        values: string[][];
+        payload?: { data: string; terminated: boolean };
       };
     }
   | { Close: { cursor: CloseCursor } }

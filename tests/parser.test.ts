@@ -88,7 +88,7 @@ describe('Parser', () => {
     });
 
     test('throws on incomplete SQL', () => {
-      const error = expectParseError('SELECT');
+      const error = expectParseError('SELECT', dialects.mysql);
       expect(error).toBeDefined();
     });
 

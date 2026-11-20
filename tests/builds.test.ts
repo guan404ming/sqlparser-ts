@@ -6,6 +6,7 @@
  */
 
 import { createRequire } from 'module';
+import { readFile } from 'node:fs/promises';
 
 /**
  * ESM (ECMAScript Modules) build tests
@@ -80,5 +81,18 @@ describe('CJS build', () => {
     await init();
     const result = parse('SELECT $1', 'postgresql');
     expect(Array.isArray(result)).toBe(true);
+  });
+});
+
+describe('init with a compiled module', () => {
+  test('loads the parser without reading files', async () => {
+    const bytes = await readFile(new URL('../wasm/sqlparser_rs_wasm_bg.wasm', import.meta.url));
+    vi.resetModules();
+    vi.doMock('node:fs/promises', () => ({
+      readFile: () => Promise.reject(new Error('no file system')),
+    }));
+    const { init, parse } = await import('../dist/index.mjs');
+    await init(new WebAssembly.Module(bytes));
+    expect(parse('SELECT 1')).toHaveLength(1);
   });
 });

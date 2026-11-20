@@ -12,7 +12,7 @@
       "import": "./dist/index.mjs",
       "require": "./dist/index.cjs"
     },
-    "./wasm/*": "./wasm/*"
+    "./sqlparser.wasm": "./wasm/sqlparser_rs_wasm_bg.wasm"
   },
   "files": [
     "dist",

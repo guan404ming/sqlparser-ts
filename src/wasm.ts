@@ -31,7 +31,7 @@ export function getWasmModule(): WasmModule {
  * Initialize the WASM module. Must be called before using any parser functions.
  * Safe to call multiple times, subsequent calls are no-ops.
  */
-export async function init(): Promise<void> {
+export async function init(module?: WebAssembly.Module): Promise<void> {
   if (wasmModule) {
     return;
   }
@@ -41,7 +41,9 @@ export async function init(): Promise<void> {
       try {
         const wasm = await import(/* @vite-ignore */ '../wasm/sqlparser_rs_wasm.js');
 
-        if (isBrowser) {
+        if (module) {
+          await wasm.default({ module_or_path: module });
+        } else if (isBrowser) {
           const wasmUrl = new URL('../wasm/sqlparser_rs_wasm_bg.wasm', import.meta.url);
           await wasm.default({ module_or_path: wasmUrl });
         } else {

@@ -62,6 +62,17 @@ export default defineConfig({
 });
 ```
 
+### Custom WASM Loading
+
+By default, `init()` reads or fetches the bundled WASM file. If your runtime can't do that, load the WASM as a `WebAssembly.Module` and pass it to `init()`. The package exports the file as `@guanmingchiu/sqlparser-ts/sqlparser.wasm`:
+
+```typescript
+import { init } from '@guanmingchiu/sqlparser-ts';
+import wasm from '@guanmingchiu/sqlparser-ts/sqlparser.wasm';
+
+await init(wasm);
+```
+
 ### Working with AST
 
 ```typescript

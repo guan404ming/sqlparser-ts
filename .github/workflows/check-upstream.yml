@@ -58,6 +58,8 @@ jobs:
       - name: Install wasm-pack
         if: steps.ver.outputs.needs == 'true'
         uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: v0.15.0
 
       - name: Build and test
         id: verify

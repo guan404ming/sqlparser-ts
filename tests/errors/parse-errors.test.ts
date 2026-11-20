@@ -14,7 +14,7 @@ describe('Parse Errors - Syntax', () => {
   });
 
   test('incomplete SELECT', () => {
-    expectParseError('SELECT');
+    expectParseError('SELECT', dialects.mysql);
   });
 
   test('incomplete FROM', () => {

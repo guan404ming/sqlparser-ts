@@ -8,6 +8,7 @@ on:
     paths:
       - 'src/**'
       - 'tests/**'
+      - 'examples/**'
       - 'Cargo.*'
       - 'package*.json'
       - '.github/workflows/ci.yml'
@@ -17,6 +18,7 @@ on:
     paths:
       - 'src/**'
       - 'tests/**'
+      - 'examples/**'
       - 'Cargo.*'
       - 'package*.json'
       - '.github/workflows/ci.yml'
@@ -48,6 +50,11 @@ jobs:
 
       - name: Run pre-commit checks
         run: ./.githooks/pre-commit
+
+      - name: Check AST types
+        run: |
+          cargo run -q --example ts_types > src/types/ast.ts
+          git diff --exit-code src/types/ast.ts
 
       - name: Install wasm-pack
         uses: jetli/wasm-pack-action@v0.4.0

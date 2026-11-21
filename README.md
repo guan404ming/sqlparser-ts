@@ -86,11 +86,6 @@ const statements = parse(`
   SELECT * FROM orders;
 `);
 console.log(statements.length); // 2
-
-// Modify AST and convert back to SQL
-const ast = parse('SELECT * FROM users')[0];
-// ... modify ast ...
-const sql = format(JSON.stringify([ast]));
 ```
 
 ### Error Handling

@@ -88,7 +88,6 @@ jobs:
 
             ## Review checklist
             - [ ] New dialects in `src/lib.rs` + `src/dialects.ts`
-            - [ ] AST changes mirrored in `src/types/ast.ts`
             - [ ] README updated if needed
 
             After merge, tag `v${{ steps.ver.outputs.latest }}` to publish.

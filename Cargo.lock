@@ -269,6 +269,7 @@ dependencies = [
  "serde-wasm-bindgen",
  "serde_json",
  "sqlparser",
+ "syn",
  "wasm-bindgen",
 ]
 
